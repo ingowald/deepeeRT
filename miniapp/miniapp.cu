@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include <fstream>
+#include <omp.h>
 
 namespace miniapp {
 
@@ -82,6 +83,11 @@ namespace miniapp {
   }
 
 
+  void ompShade(vec4f *d_pixels,
+                DPRRay *d_rays,
+                DPRHit *d_hits,
+                const vec2i fbSize);
+  
   __global__
   void g_shadeRays(vec4f *d_pixels,
                    DPRRay *d_rays,
@@ -119,9 +125,12 @@ namespace miniapp {
     Ray ray = camera.generateRay(pixel,false);
     (Ray &)d_rays[ix+iy*fbSize.x] = ray;
   }
-  
+
   void main(int ac, char **av)
   {
+// #pragma omp target
+    int ompNumGPUs = omp_get_num_devices();
+    PRINT(ompNumGPUs);
     double scale = 1;
     std::string up = "y";
     std::string inFileName;
@@ -180,6 +189,7 @@ namespace miniapp {
     
     DPRHit *d_hits = 0;
     cudaMalloc((void **)&d_hits,fbSize.x*fbSize.y*sizeof(DPRHit));
+    printf("d_hits %p\n",d_hits);
 
     std::cout << "#dpm: calling trace" << std::endl;
     dprTrace(world,d_rays,d_hits,fbSize.x*fbSize.y);
@@ -187,7 +197,11 @@ namespace miniapp {
     std::cout << "#dpm: shading rays" << std::endl;
     vec4f *m_pixels = 0;
     cudaMallocManaged((void **)&m_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
+#if 1
+    ompShade(m_pixels,d_rays,d_hits,fbSize);
+#else
     g_shadeRays<<<nb,bs>>>(m_pixels,d_rays,d_hits,fbSize);
+#endif
     cudaStreamSynchronize(0);
 
 

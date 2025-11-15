@@ -252,6 +252,24 @@ namespace dp {
       CuBQLCUDABackend *const be;
     };
 
+
+//     void ompTrace(Ray *rays,
+//                   Hit *hits,
+//                   int numRays)
+//     {
+//       //#pragma omp parallel
+// #pragma omp target
+// #pragma omp teams distribute parallel for
+//       {
+//       }
+//     }
+                            
+    
+    void omp_trace(TrianglesDP::DevGroup group,
+                 Ray *rays,
+                 Hit *hits,
+                   int numRays);
+    
     void InstancesDP::trace(Ray *rays,
                             Hit *hits,
                             int numRays) 
@@ -266,9 +284,15 @@ namespace dp {
 
       int bs = 128;
       int nb = divRoundUp(numRays,bs);
+#if 1
+      omp_trace(triangles->getDevGroup(),
+                rays,hits,
+                numRays);
+#else
       g_trace<<<nb,bs>>>(triangles->getDevGroup(),
                          rays,hits,
                          numRays);
+#endif
       CUBQL_CUDA_SYNC_CHECK();
     }
     

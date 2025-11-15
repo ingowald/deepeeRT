@@ -3,6 +3,8 @@
 
 find_package(CUDAToolkit REQUIRED)
 
+find_package(OpenMP)
+
 add_library(deepeeRT_common STATIC
   Backend.h
   Backend.cpp
@@ -15,6 +17,7 @@ target_link_libraries(deepeeRT_common PUBLIC
   cuBQL
   CUDA::cuda_driver
   CUDA::cudart_static
+#  OpenMP::OpenMP_CXX
 )
 
 add_library(deepeeRT STATIC

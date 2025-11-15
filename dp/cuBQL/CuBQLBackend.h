@@ -6,7 +6,7 @@
 #include "dp/Backend.h"
 #include "dp/Group.h"
 #include <cuBQL/bvh.h>
-
+#include <omp.h>
 namespace dp {
   
   struct CuBQLCUDABackend : public dp::Backend

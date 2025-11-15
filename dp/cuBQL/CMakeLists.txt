@@ -4,6 +4,7 @@
 add_library(deepeeRT_cuBQL STATIC
   CuBQLBackend.h
   CuBQLBackend.cu
+  ompTrace.cpp
 )
 target_link_libraries(deepeeRT_cuBQL PUBLIC
   deepeeRT_common
