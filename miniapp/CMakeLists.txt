@@ -18,11 +18,22 @@ target_link_libraries(dpMiniApp PUBLIC deepeeRT
 
 
 
+find_package(VTK)
+if (VTK_FOUND)
+  add_executable(vtkToDGEF
+    vtkToDGEF.cpp
+  )
+  target_link_libraries(vtkToDGEF PUBLIC
+    deepeeRT
+    VTK::CommonCore
+    VTK::IOLegacy
+#    OpenMP::OpenMP_CXX
+#    OpenMP::OpenMP_C
+  )
+endif()
 
-add_executable(bla
-  bla.cpp
-)
-target_link_libraries(bla PUBLIC 
-  OpenMP::OpenMP_CXX
-  OpenMP::OpenMP_C
-)
+
+
+#add_executable(bench_cpu_tbb bench.cpp)
+#add_executable(bench_cpu_omp bench.cpp)
+
