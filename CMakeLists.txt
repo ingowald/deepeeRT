@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+cmake_minimum_required(VERSION 3.24)
+cmake_policy(SET CMP0048 NEW)
+
 set(CMAKE_BUILD_TYPE_INIT "Release")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -21,9 +24,16 @@ if (ENABLE_OMP_NVIDIA)
   endif()
 endif()
 
-cmake_minimum_required(VERSION 3.16)
-cmake_policy(SET CMP0048 NEW)
-project(DeePeeRT VERSION 0.1.0 LANGUAGES C CXX CUDA)
+
+project(DeePeeRT VERSION 0.1.0 LANGUAGES C CXX)
+
+option(DEEPEE_ENABLE_CUDA "use CUDA" ON)
+if (DEEPEE_ENABLE_CUDA)
+  include(CheckLanguage)
+  check_language(CUDA)
+  enable_language(CUDA)
+  set(DP_HAVE_CUDA ON)
+endif()
 
 if(NOT SET_UP_CONFIGURATIONS_DONE)
   set(SET_UP_CONFIGURATIONS_DONE 1)
@@ -51,7 +61,7 @@ endif()
 
 
 
-find_package(OpenMP REQUIRED)
+#find_package(OpenMP REQUIRED)
 
 #CMAKE_CXX_COMPILER:STRING=/opt/nvidia/hpc_sdk/Linux_x86_64/25.9/compilers/bin/nvc++
 #CMAKE_C_COMPILER:STRING=/opt/nvidia/hpc_sdk/Linux_x86_64/25.9/compilers/bin/nvc

@@ -3,6 +3,8 @@
 
 find_package(OpenMP REQUIRED)
 
+
+if (OFF)
 add_executable(dpMiniApp
   Mesh.h
   Mesh.cpp
@@ -12,10 +14,10 @@ add_executable(dpMiniApp
   miniapp.cu
   ompShade.cpp
 )
-target_link_libraries(dpMiniApp PUBLIC deepeeRT
-  OpenMP::OpenMP_CXX
+target_link_libraries(dpMiniApp PUBLIC deepeeRT_cuda
+#  OpenMP::OpenMP_CXX
 )
-
+endif()
 
 
 find_package(VTK)
@@ -24,16 +26,31 @@ if (VTK_FOUND)
     vtkToDGEF.cpp
   )
   target_link_libraries(vtkToDGEF PUBLIC
-    deepeeRT
+#    deepeeRT
+    cuBQL
     VTK::CommonCore
     VTK::IOLegacy
-#    OpenMP::OpenMP_CXX
-#    OpenMP::OpenMP_C
   )
 endif()
 
-
+#    OpenMP::OpenMP_CXX
+#    OpenMP::OpenMP_C
 
 #add_executable(bench_cpu_tbb bench.cpp)
+#target_link_libraries(bench_cpu_tbb deepee_cpu_tbb)
+
+foreach(config IN ITEMS
+    dp_cubql_all_cuda
+    dp_cubql_build_cuda_trace_offload
+  )
+  if (TARGET deepeeRT_${config})
+    add_executable(bench_${config} bench.cpp)
+    target_link_libraries(bench_${config} deepeeRT_${config})
+  endif()
+#  add_executable(bench_${config} bench.cpp)
+#  target_link_libraries(bench_${config} dp_${config})
+endforeach()
+
+
 #add_executable(bench_cpu_omp bench.cpp)
 

@@ -129,8 +129,8 @@ namespace miniapp {
   void main(int ac, char **av)
   {
 // #pragma omp target
-    int ompNumGPUs = omp_get_num_devices();
-    PRINT(ompNumGPUs);
+    // int ompNumGPUs = omp_get_num_devices();
+    // PRINT(ompNumGPUs);
     double scale = 1;
     std::string up = "y";
     std::string inFileName;

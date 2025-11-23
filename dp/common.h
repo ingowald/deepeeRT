@@ -6,7 +6,9 @@
 #include "deepee/deepee.h"
 #include "cuBQL/math/box.h"
 #include "cuBQL/math/linear.h"
-#include <cuda_runtime.h>
+#if DEEPEE_CUDA
+# include <cuda_runtime.h>
+#endif
 
 #include <vector>
 #include <map>
@@ -17,6 +19,7 @@
 namespace dp {
   using namespace ::cuBQL;
 
+#if DEEPEE_CUDA
   /*! helper class that sets the active cuda device to the given gpuID
       for the lifetime of this class, and restores it to whatever it
       was after that variable dies */
@@ -41,5 +44,6 @@ namespace dp {
       
     return attributes.devicePointer != 0;
   }
-
+#endif
+  
 }
