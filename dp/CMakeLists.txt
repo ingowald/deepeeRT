@@ -148,6 +148,7 @@ target_link_libraries(dp_common PUBLIC dp_config)
 # - traverse with cuda cuBQL traveral
 if (DP_HAVE_CUDA)
   set(TGT dp_cubql_all_cuda)
+  message("adding interface ${TGT}")
   add_library(${TGT} INTERFACE)
   target_link_libraries(${TGT} INTERFACE
     dp_common
@@ -155,6 +156,12 @@ if (DP_HAVE_CUDA)
     dp_cubql_upload_ignore
     dp_cubql_trace_cuda
   )
+
+  if (TARGET ${TGT})
+    message("${TGT} exists")
+  else()
+    message("${TGT} does NOT exist")
+  endif()
 endif()
 
 # - build cuBQL BVH with *cpu* builders (on host, then upload via cuda)

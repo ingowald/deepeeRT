@@ -5,6 +5,7 @@
 
 #include "dp/Backend.h"
 #include "dp/Group.h"
+#include "dp/DeviceAbstraction.h"
 #include <cuBQL/bvh.h>
 
 namespace dp_cubql {
@@ -55,15 +56,23 @@ namespace dp_cubql {
                int numRays);
     
     // ---------------------- device abstraction ----------------------
+    DeviceAbstraction *device = 0;
     /*! device abstraction ... */
-    void  dev_init(int devID);
-    bool  isDevicePointer(const void *ptr);
-    void *dev_malloc(size_t numBytes);
-    void  dev_free(void *ptr);
-    void  dev_sync_check();
-    void  upload(void *devAddr, const void *hostAddr, size_t numBytes);
-    void  download(void *hostAddr, const void *devAddr, size_t numBytes);
-    int   dev_deviceCount();
+    void  dev_init();
+    bool  isDevicePointer(const void *ptr)
+    { return DeviceAbstraction::isDevicePointer(ptr); }
+    void *dev_malloc(size_t numBytes)
+    { assert(device); return device->malloc(numBytes); }
+    void  dev_free(void *ptr)
+    { assert(device); device->free(ptr); }
+    void  dev_sync_check()
+    { assert(device); device->syncCheck(); }
+    void  upload(void *devAddr, const void *hostAddr, size_t numBytes)
+    { assert(device); device->upload(devAddr,hostAddr,numBytes); }
+    void  download(void *hostAddr, const void *devAddr, size_t numBytes)
+    { assert(device); device->download(hostAddr,devAddr,numBytes); }
+    int   dev_deviceCount()
+    { return DeviceAbstraction::getDeviceCount(); }
   };
 
 }

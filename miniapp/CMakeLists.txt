@@ -43,9 +43,11 @@ foreach(config IN ITEMS
     dp_cubql_all_cuda
     dp_cubql_build_cuda_trace_offload
   )
-  if (TARGET deepeeRT_${config})
+  if (TARGET ${config})
     add_executable(bench_${config} bench.cpp)
-    target_link_libraries(bench_${config} deepeeRT_${config})
+    target_link_libraries(bench_${config} ${config})
+  else()
+    message("config '${config}' not built")
   endif()
 #  add_executable(bench_${config} bench.cpp)
 #  target_link_libraries(bench_${config} dp_${config})

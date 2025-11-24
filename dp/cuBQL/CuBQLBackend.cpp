@@ -140,7 +140,7 @@ namespace dp_cubql {
   {
     // SetActiveGPU forDuration(context->gpuID);
     // cudaFree(0);
-    dev_init(context->gpuID);
+    dev_init();
   }
 
   std::shared_ptr<dp::InstancesDPImpl>
@@ -150,6 +150,9 @@ namespace dp_cubql {
   std::shared_ptr<dp::TrianglesDPImpl>
   CuBQLBackend::createTrianglesDPImpl(dp::TrianglesDPGroup *fe) 
   { return std::make_shared<dp_cubql::TrianglesDP>(this,fe); }
+
+  void  CuBQLBackend::dev_init()
+  { if (!device) device = new DeviceAbstraction(context->gpuID); }
   
 }
 
