@@ -45,7 +45,7 @@ foreach(config IN ITEMS
   )
   if (TARGET ${config})
     add_executable(bench_${config} bench.cpp)
-    target_link_libraries(bench_${config} ${config})
+    target_link_libraries(bench_${config} PUBLIC ${config})
   else()
     message("config '${config}' not built")
   endif()

@@ -1,6 +1,7 @@
 #include "deepee/deepee.h"
 #include "DGEF.h"
-#include "dp/common/DeviceAbstraction.h"
+#include "dp/DeviceAbstraction.h"
+#include <fstream>
 
 void usage(const std::string &err="")
 {
@@ -14,15 +15,45 @@ void usage(const std::string &err="")
   exit(0);
 }
 
+template<typename T>
+std::vector<T> loadVectorOf(std::ifstream &in, int part=0, int numParts=1)
+{
+  if (!in.good()) throw std::runtime_error("invalid input stream");
+  in.seekg(0,std::ios::end);
+  size_t size = in.tellg();
+  in.seekg(0,std::ios::beg);
+  size_t count = size/sizeof(T);
+  std::vector<T> vec;
+  size_t begin = part * count / numParts;
+  size_t end = (part+1) * count / numParts;
+  T t;
+  for (size_t i=0;i<begin;i++)
+    in.read((char *)&t,sizeof(t));
+  for (size_t i=begin;i<end;i++) {
+    in.read((char *)&t,sizeof(t));
+    vec.push_back(t);
+  }
+  for (size_t i=end;i<count;i++)
+    in.read((char *)&t,sizeof(t));
+  return vec;
+}
+
+template<typename T>
+std::vector<T> loadVectorOf(const std::string &fn, int part=0, int numParts=1)
+{
+  std::ifstream in(fn,std::ios::binary);
+  return loadVectorOf<T>(in,part,numParts);
+}
+
 int main(int ac, char **av)
 {
-  std::string rayFileName;
+  std::string raysFileName;
   std::string modelFileName;
   int gpuID = 0;
   for (int i=1;i<ac;i++) {
     std::string arg = av[i];
     if (arg == "-r")
-      rayFileName = av[++i];
+      raysFileName = av[++i];
     else if (arg == "-m")
       modelFileName = av[++i];
     else {
@@ -31,7 +62,7 @@ int main(int ac, char **av)
   }
 
   if (modelFileName.empty()) usage("no model file specified");
-  if (rayFileName.empty()) usage("no ray file specified");
+  if (raysFileName.empty()) usage("no ray file specified");
 
   dgef::Model::SP model = dgef::Model::read(modelFileName);
   if (model->meshes.size() != 1) throw std::runtime_error("unsupported config...");
@@ -41,7 +72,7 @@ int main(int ac, char **av)
   DPRContext dpc = dprContextCreate(DPR_CONTEXT_GPU,gpuID);
   std::vector<DPRTriangles> geoms;
   for (auto mesh : model->meshes) {
-    std::vector<vec3i> int_indices;
+    std::vector<cuBQL::vec3i> int_indices;
     for (auto idx : mesh->indices)
       int_indices.push_back({(int)idx.x,(int)idx.y,(int)idx.z});
     geoms.push_back(dprCreateTrianglesDP(dpc,
@@ -56,7 +87,7 @@ int main(int ac, char **av)
   DPRWorld world
     = dprCreateWorldDP(dpc,&group,nullptr,1);
 
-  std::vector<DPRRay> h_rays = readVector<DPRRay>(raysFileName);
+  std::vector<DPRRay> h_rays = loadVectorOf<DPRRay>(raysFileName);
   int numRays = h_rays.size();
 
   DPRRay *d_rays = (DPRRay*)device->malloc(numRays*sizeof(DPRRay));

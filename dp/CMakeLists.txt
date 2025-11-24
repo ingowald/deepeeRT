@@ -91,7 +91,7 @@ if (DP_HAVE_CUDA)
   # doesn't need a "bulid_*for*" because this'll always be on gpu
   set(TGT dp_cubql_build_cuda)
   add_library(${TGT} cuBQL/cudaBuild.cu)
-  target_compile_definitions(${TGT} PUBLIC)
+  #  target_compile_definitions(${TGT} PUBLIC)
   target_link_libraries(${TGT} PUBLIC
     dp_config
     $<BUILD_INTERFACE:cuBQL_cuda_double3_static>
