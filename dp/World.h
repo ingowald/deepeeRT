@@ -10,7 +10,7 @@ namespace dp {
   struct Context;
   struct Group;
 
-  struct InstancesDPImpl;
+  struct InstancesDPGroupImpl;
   
   struct InstancesDPGroup {
     InstancesDPGroup(Context *context,
@@ -22,7 +22,7 @@ namespace dp {
     std::vector<Group *> const groups;
     const DPRAffine     *const d_transforms;
     Context             *const context;
-    std::shared_ptr<InstancesDPImpl> impl;
+    std::shared_ptr<InstancesDPGroupImpl> impl;
   };
     
 } // ::dp

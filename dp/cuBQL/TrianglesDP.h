@@ -29,10 +29,10 @@ namespace dp_cubql {
     uint64_t         const userData;
   };
   
-  struct TrianglesDP : public dp::TrianglesDPImpl {
-    TrianglesDP(CuBQLBackend *be,
-                dp::TrianglesDPGroup *fe);
-    virtual ~TrianglesDP();
+  struct TrianglesDPGroup : public dp::TrianglesDPGroupImpl {
+    TrianglesDPGroup(CuBQLBackend *be,
+                     dp::TrianglesDPGroup *fe);
+    virtual ~TrianglesDPGroup();
     
     struct DevGroup {
       inline __cubql_both TriangleDP getTriangle(PrimRef prim) const;
@@ -59,7 +59,7 @@ namespace dp_cubql {
   };
 
   inline __cubql_both
-  TriangleDP TrianglesDP::DevGroup::getTriangle(PrimRef prim) const
+  TriangleDP TrianglesDPGroup::DevGroup::getTriangle(PrimRef prim) const
   {
     DevMesh mesh = meshes[prim.geomID];
     vec3i idx = mesh.indices[prim.primID];

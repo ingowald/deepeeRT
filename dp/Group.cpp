@@ -11,7 +11,12 @@ namespace dp {
     : context(context),
       geoms(geoms)
   {
-    impl = context->backend->createTrianglesDPImpl(this);
+    assert(this);
+    assert(context);
+    assert(context->backend);
+    PING;
+    impl = context->backend->createTrianglesDPGroupImpl(this);
+    assert(impl);
   }
 
 } // ::dp

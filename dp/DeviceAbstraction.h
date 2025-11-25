@@ -1,3 +1,5 @@
+#pragma once
+
 #include "dp/common.h"
 
 namespace dp {

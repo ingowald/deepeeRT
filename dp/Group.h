@@ -8,7 +8,7 @@
 namespace dp {
 
   struct Context;
-  struct TrianglesDPImpl;
+  struct TrianglesDPGroupImpl;
 
   /*! allows for referencing a specific primitive within a specific
       geometry within multiple geometries that a group may be built
@@ -19,15 +19,17 @@ namespace dp {
   };
   
   struct Group {
+    virtual ~Group() = default;
   };
   
   struct TrianglesDPGroup : public Group {
     TrianglesDPGroup(Context *context,
                      const std::vector<TrianglesDP *> &geoms);
+    virtual ~TrianglesDPGroup() = default;
 
     std::vector<TrianglesDP *> geoms;
     Context *const context;
-    std::shared_ptr<TrianglesDPImpl> impl;
+    std::shared_ptr<TrianglesDPGroupImpl> impl;
   };
 
 } // ::dp

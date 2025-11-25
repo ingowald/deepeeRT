@@ -36,17 +36,17 @@ namespace dp {
   };
 
   /*! implements a group of double-precision triangles */
-  struct TrianglesDPImpl {
-    TrianglesDPImpl(TrianglesDPGroup *const fe) : fe(fe) {}
-    virtual ~TrianglesDPImpl() = default;
+  struct TrianglesDPGroupImpl {
+    TrianglesDPGroupImpl(TrianglesDPGroup *const _fe) : fe(_fe) { assert(fe); }
+    virtual ~TrianglesDPGroupImpl() = default;
     TrianglesDPGroup *const fe;
   };
     
   /*! implements a group of double-precision instances, including the
     actual trace() method */
-  struct InstancesDPImpl {
-    InstancesDPImpl(InstancesDPGroup *const fe) : fe(fe) {}
-    virtual ~InstancesDPImpl() = default;
+  struct InstancesDPGroupImpl {
+    InstancesDPGroupImpl(InstancesDPGroup *const fe) : fe(fe) {}
+    virtual ~InstancesDPGroupImpl() = default;
 
     virtual void trace(Ray *rays,
                        Hit *hits,
@@ -62,11 +62,11 @@ namespace dp {
     Backend(Context *const context);
     virtual ~Backend() = default;
     
-    virtual std::shared_ptr<InstancesDPImpl>
-    createInstancesDPImpl(dp::InstancesDPGroup *fe) = 0;
+    virtual std::shared_ptr<InstancesDPGroupImpl>
+    createInstancesDPGroupImpl(dp::InstancesDPGroup *fe) = 0;
     
-    virtual std::shared_ptr<TrianglesDPImpl>
-    createTrianglesDPImpl(dp::TrianglesDPGroup *fe) = 0;
+    virtual std::shared_ptr<TrianglesDPGroupImpl>
+    createTrianglesDPGroupImpl(dp::TrianglesDPGroup *fe) = 0;
     
     Context *const context;
     int const gpuID;

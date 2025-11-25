@@ -16,6 +16,7 @@
 #include "dp/cuBQL/dpc_omp.h"
 #include "dp/cuBQL/AutoUploadArray.h"
 #include "dp/cuBQL/TrianglesDP.h"
+#include "dp/cuBQL/InstancesDP.h"
 
 namespace dp_cubql {
   // using namespace ::dp;
@@ -76,18 +77,6 @@ namespace dp_cubql {
 //   }
 // #endif
 
-  struct InstancesDP : public dp::InstancesDPImpl {
-    InstancesDP(CuBQLBackend *be,
-                dp::InstancesDPGroup *fe)
-      : InstancesDPImpl(fe), be(be)
-    {}
-    void trace(Ray *rays,
-               Hit *hits,
-               int numRays) override;
-    CuBQLBackend *const be;
-  };
-
-
   //     void ompTrace(Ray *rays,
   //                   Hit *hits,
   //                   int numRays)
@@ -100,40 +89,50 @@ namespace dp_cubql {
   //     }
                             
     
-  void omp_trace(TrianglesDP::DevGroup group,
-                 Ray *rays,
-                 Hit *hits,
-                 int numRays);
-  void cuda_trace(TrianglesDP::DevGroup group,
-                  Ray *rays,
-                  Hit *hits,
-                  int numRays);
+  // void omp_trace(TrianglesDPGroup::DevGroup group,
+  //                Ray *rays,
+  //                Hit *hits,
+  //                int numRays);
+  // void cuda_trace(TrianglesDPGroup::DevGroup group,
+  //                 Ray *rays,
+  //                 Hit *hits,
+  //                 int numRays);
     
-  void InstancesDP::trace(Ray *rays,
-                          Hit *hits,
-                          int numRays) 
-  {
-    be->dev_sync_check();//CUBQL_CUDA_SYNC_CHECK();
-    assert(fe->groups.size() == 1);
-    assert(fe->d_transforms == nullptr);
-    TrianglesDPGroup *tg = (TrianglesDPGroup *)fe->groups[0];
-    assert(tg);
-    TrianglesDP *triangles = (TrianglesDP*)tg->impl.get();
-    assert(triangles);
+//   void InstancesDPGroup::trace(Ray *rays,
+//                           Hit *hits,
+//                           int numRays) 
+//   {
+//     be->dev_sync_check();//CUBQL_CUDA_SYNC_CHECK();
+//     assert(fe->groups.size() == 1);
+//     assert(fe->d_transforms == nullptr);
+    
+//     // TrianglesDPGroup *tg = (TrianglesDPGroup *)fe->groups[0];
 
-    int bs = 128;
-    int nb = divRoundUp(numRays,bs);
-#if DP_OMP
-    omp_trace(triangles->getDevGroup(),
-              rays,hits,
-              numRays);
-#endif
-#if DP_CUDA
-    cuda_trace(triangles->getDevGroup(),
-               rays,hits,
-               numRays);
-#endif
-  }
+//     // abstract group - take the first one
+//     dp::Group *fe_group = fe->groups[0];
+//     assert(fe_group);
+    
+//     // we know right now all groups are triangle groups
+//     dp::TrianglesDPGroup *fe_trianglesGroup = (dp::TrianglesDPGroup*)fe_group;
+//     TrianglesDPGroup *my_trianglesGroup = (TrianglesDPGroup *)fe_trianglesGroup->impl.get();
+//     assert(my_trianglesGroup);
+//     // TrianglesDP *triangles = (TrianglesDPGroup*)tg->impl.get();
+//     // assert(triangles);
+
+//     int bs = 128;
+//     int nb = divRoundUp(numRays,bs);
+//     PING;
+// #if DP_OMP
+//     omp_trace(triangles->getDevGroup(),
+//               rays,hits,
+//               numRays);
+// #endif
+// #if DP_CUDA
+//     cuda_trace(my_trianglesGroup->getDevGroup(),
+//                rays,hits,
+//                numRays);
+// #endif
+//   }
     
   CuBQLBackend::CuBQLBackend(Context *const context)
     : Backend(context)
@@ -143,13 +142,20 @@ namespace dp_cubql {
     dev_init();
   }
 
-  std::shared_ptr<dp::InstancesDPImpl>
-  CuBQLBackend::createInstancesDPImpl(dp::InstancesDPGroup *fe)
-  { return std::make_shared<dp_cubql::InstancesDP>(this,fe); }
+  std::shared_ptr<dp::InstancesDPGroupImpl>
+  CuBQLBackend::createInstancesDPGroupImpl(dp::InstancesDPGroup *fe)
+  { return std::make_shared<dp_cubql::InstancesDPGroup>(this,fe); }
     
-  std::shared_ptr<dp::TrianglesDPImpl>
-  CuBQLBackend::createTrianglesDPImpl(dp::TrianglesDPGroup *fe) 
-  { return std::make_shared<dp_cubql::TrianglesDP>(this,fe); }
+  std::shared_ptr<dp::TrianglesDPGroupImpl>
+  CuBQLBackend::createTrianglesDPGroupImpl(dp::TrianglesDPGroup *fe) 
+  {
+    assert(fe);
+    assert(this);
+    std::cout << "creating TrianglesDP" << std::endl;
+    auto ret = std::make_shared<dp_cubql::TrianglesDPGroup>(this,fe);
+    assert(ret.get());
+    return ret;
+  }
 
   void  CuBQLBackend::dev_init()
   { if (!device) device = new DeviceAbstraction(context->gpuID); }

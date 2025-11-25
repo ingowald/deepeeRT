@@ -13,16 +13,19 @@ namespace dp_cubql {
     pointer this will just use that pointer */
   template<typename T>
   struct AutoUploadArray {
-    AutoUploadArray(CuBQLBackend *be, const T *elements, int count)
+    AutoUploadArray(CuBQLBackend *be, const T *_elements, int count)
       : be(be)
     {
       this->count = count;
-      if (be->isDevicePointer(elements)) {
-        this->elements = elements;
+      if (be->isDevicePointer(_elements)) {
+        std::cout << "***SHARING***" << std::endl;
+        this->elements = _elements;
         this->needsFree = false;
       } else {
         this->elements = (T *)be->dev_malloc(count*sizeof(T));
-        be->upload((void *)this->elements,(const void *)elements,count*sizeof(T));
+        std::cout << "uploading " << (int*)_elements
+                  << " -> " << (int*)this->elements << std::endl;
+        be->upload((void *)this->elements,(const void *)_elements,count*sizeof(T));
         this->needsFree = true;
       }
     }

@@ -9,12 +9,15 @@ else()
   message("CUDA not found - disabling")
 endif()
 
-find_package(OpenMP)
-if (OpenMP_FOUND)
-  message("found OpenMP, enabling cuda builder and traversers")
-  set(DP_HAVE_OFFLOAD ON)
-else()
-  message("OpenMP not found - disabling")
+if (DP_HAVE_OFFLOAD)
+  find_package(OpenMP REQUIRED)
+#  find_package(OpenMP)
+#  if (OpenMP_FOUND)
+#    message("found OpenMP, enabling cuda builder and traversers")
+#    set(DP_HAVE_OFFLOAD ON)
+#  else()
+#    message("OpenMP not found - disabling")
+#  endif()
 endif()
 
 add_library(dp_config INTERFACE)
@@ -48,6 +51,28 @@ set(DEEPEE_SOURCES
   cuBQL/TrianglesDP.cpp
 )
 
+
+# ==================================================================
+# *DEVICE*: general malloc/free/memcpy/etc device abstraction
+# can be consumed by a traverser
+# ==================================================================
+if (DP_HAVE_CUDA)
+  add_library(dp_device_cuda DeviceCuda.cu)
+  target_link_libraries(dp_device_cuda PUBLIC
+    dp_config
+    CUDA::cuda_driver
+    CUDA::cudart_static
+  )
+endif()
+
+if (DP_HAVE_OFFLOAD)
+  add_library(dp_device_offload DeviceOffload.cpp)
+  target_link_libraries(dp_device_offload PUBLIC
+    dp_config
+    OpenMP::OpenMP_CXX
+  )
+endif()
+
 # ==================================================================
 # *UPLOAD*: how to get a BVH from whereever it is to a device where it
 # can be consumed by a traverser
@@ -57,8 +82,9 @@ if (DP_HAVE_CUDA)
   add_library(${TGT} cuBQL/upload_via_cuda.cu)
   target_link_libraries(${TGT} PUBLIC
     dp_config
-    CUDA::cuda_driver
-    CUDA::cudart_static
+    dp_device_cuda
+#    CUDA::cuda_driver
+#    CUDA::cudart_static
   )
 endif()
 
@@ -66,8 +92,9 @@ if (DP_HAVE_OFFLOAD)
   set(TGT dp_cubql_upload_offload)
   add_library(${TGT} cuBQL/upload_via_offload.cpp)
   target_link_libraries(${TGT} PUBLIC
-    dp_config
-    OpenMP::OpenMP_CXX
+    dp_device_offload
+#    dp_config
+#    OpenMP::OpenMP_CXX
   )
 endif()
 
@@ -152,6 +179,7 @@ if (DP_HAVE_CUDA)
   add_library(${TGT} INTERFACE)
   target_link_libraries(${TGT} INTERFACE
     dp_common
+    dp_device_cuda
     dp_cubql_build_cuda
     dp_cubql_upload_ignore
     dp_cubql_trace_cuda
@@ -195,8 +223,8 @@ if (DP_HAVE_OFFLOAD AND DP_HAVE_CUDA)
   add_library(${TGT} INTERFACE)
   target_link_libraries(${TGT} INTERFACE
     dp_common
-    dp_cubql_build_cpu
-    dp_cubql_upload_cuda
-    dp_cubql_trace_cuda)
+    dp_cubql_build_cuda
+    dp_cubql_upload_ignore
+    dp_cubql_trace_offload)
 endif()
 

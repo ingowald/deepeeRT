@@ -23,17 +23,16 @@ namespace dp_cubql {
 
   inline __cubql_both
   void trace(int tid,
-             TrianglesDP::DevGroup group,
+             TrianglesDPGroup::DevGroup group,
              Ray *rays,
              Hit *hits,
-             int numRays)
+             int numRays,
+             bool dbg)
   {
     Hit hit = hits[tid];
     hit.primID = -1;
     int instID = 0;
 
-    bool dbg = false;
-    
     ::cuBQL::ray3d ray(rays[tid].origin,
                        rays[tid].direction,
                        rays[tid].tMin,

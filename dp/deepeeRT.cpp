@@ -27,19 +27,19 @@ DPRTriangles dprCreateTrianglesDP(DPRContext _context,
                                     yielded the intersection.  */
                                   uint64_t userData,
                                   /*! device array of vertices */
-                                  DPRvec3 *d_vertexArray,
+                                  DPRvec3 *vertexArray,
                                   size_t   vertexCount,
                                   /*! device array of int3 vertex indices */
-                                  DPRint3 *d_indexArray,
+                                  DPRint3 *indexArray,
                                   size_t   indexCount)
 {
   dp::Context *context = (dp::Context *)_context;
   assert(context);
   return (DPRTriangles)new dp::TrianglesDP(context,
                                            userData,
-                                           (const dp::vec3d*)d_vertexArray,
+                                           (const dp::vec3d*)vertexArray,
                                            vertexCount,
-                                           (const dp::vec3i*)d_indexArray,
+                                           (const dp::vec3i*)indexArray,
                                            indexCount);
 }
 
@@ -98,6 +98,7 @@ void dprTrace(/*! the world we want the rays to be traced against */
   assert(d_hits);
   assert(d_rays);
   assert(numRays > 0);
+  PING;
   world->traceRays(d_rays,d_hits,numRays);
 }
 

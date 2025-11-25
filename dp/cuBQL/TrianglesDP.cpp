@@ -9,15 +9,18 @@ namespace dp_cubql {
     : userData(userData),
       vertices(be,verticesArray,verticesCount),
       indices(be,indicesArray,indicesCount)
-  {}
+  {
+    PING;
+  }
     
   DevMesh HostMesh::getDD() const
   { return { vertices.elements, indices.elements, userData }; }
   
-  TrianglesDP::TrianglesDP(CuBQLBackend *be,
-                           dp::TrianglesDPGroup *fe)
-    : TrianglesDPImpl(fe), be(be)
+  TrianglesDPGroup::TrianglesDPGroup(CuBQLBackend *be,
+                                     dp::TrianglesDPGroup *fe)
+    : TrianglesDPGroupImpl(fe), be(be)
   {
+    PING;
     // SetActiveGPU forDuration(be->gpuID);
       
     int numTrisTotal = 0;
@@ -25,26 +28,37 @@ namespace dp_cubql {
     for (auto geom : fe->geoms) {
       numTrisTotal += geom->indexCount;
       // this will automatically upload the vertex arrays if so required:
+      PING;
+      PRINT(geom->vertexArray);
+      PRINT(geom->indexArray);
       auto hm = std::make_shared<HostMesh>
         (be,
          geom->userData,
          geom->vertexArray,geom->vertexCount,
          geom->indexArray,geom->indexCount);
+      PING;
       hostMeshes.push_back(hm);
       devMeshes.push_back(hm->getDD());
     }
+    PING;
+    PRINT(numTrisTotal);
+
+    PRINT(devMeshes.size());
     // cudaMalloc((void **)&meshes,devMeshes.size()*sizeof(DevMesh));
     meshes = (DevMesh *)be->dev_malloc(devMeshes.size()*sizeof(DevMesh));
     // cudaMemcpy((void*)meshes,devMeshes.data(),
     //            devMeshes.size()*sizeof(DevMesh),cudaMemcpyDefault);
+    PING;
     be->upload(meshes,devMeshes.data(),devMeshes.size()*sizeof(DevMesh));
       
     // cudaMalloc((void **)&primRefs,numTrisTotal*sizeof(*primRefs));
     primRefs = (PrimRef *)be->dev_malloc(numTrisTotal*sizeof(*primRefs));
-
+    PRINT(primRefs);
+    
     box3d   *primBounds = nullptr;
     // cudaMalloc((void **)&primBounds,numTrisTotal*sizeof(*primBounds));
     primBounds = (box3d *)be->dev_malloc(numTrisTotal*sizeof(*primBounds));
+    PRINT(primBounds);
 
     int offset = 0;
     for (int meshID=0;meshID<(int)hostMeshes.size();meshID++) {
@@ -90,7 +104,7 @@ namespace dp_cubql {
     be->dev_free(primBounds);
   }
   
-  TrianglesDP::~TrianglesDP()
+  TrianglesDPGroup::~TrianglesDPGroup()
   {
     // cudaFree(meshes);
     // cudaFree(primRefs); 

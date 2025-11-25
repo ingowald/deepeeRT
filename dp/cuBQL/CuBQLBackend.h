@@ -23,19 +23,19 @@ namespace dp_cubql {
     uint64_t userData;
   };
 
-  struct TrianglesDP;
+  // struct TrianglesDPGroup;
   
   struct CuBQLBackend : public dp::Backend
   {
     CuBQLBackend(Context *const context);
     virtual ~CuBQLBackend() = default;
     
-    virtual std::shared_ptr<InstancesDPImpl>
-    createInstancesDPImpl(dp::InstancesDPGroup *fe) override;
+    virtual std::shared_ptr<InstancesDPGroupImpl>
+    createInstancesDPGroupImpl(dp::InstancesDPGroup *fe) override;
     
-    virtual std::shared_ptr<TrianglesDPImpl>
-    createTrianglesDPImpl(dp::TrianglesDPGroup *fe) override;
-
+    virtual std::shared_ptr<TrianglesDPGroupImpl>
+    createTrianglesDPGroupImpl(dp::TrianglesDPGroup *fe) override;
+    
     // ---------------------- build interface ----------------------
     /*! generate boxes and primrefs for one mesh within a group; all
         data is already allocated */
@@ -50,7 +50,7 @@ namespace dp_cubql {
     void bvh_free(bvh_t &bvh);
 
     // ---------------------- trace abstraction ----------------------
-    void trace(TrianglesDP *dp,
+    void trace(TrianglesDPGroup *dp,
                Ray *rays,
                Hit *hits,
                int numRays);

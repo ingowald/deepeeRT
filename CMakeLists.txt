@@ -22,6 +22,7 @@ if (ENABLE_OMP_NVIDIA)
     set(CMAKE_CUDA_COMPILER /opt/nvidia/hpc_sdk/Linux_x86_64/25.9/compilers/bin/nvcc)
     set(CMAKE_CXX_FLAGS -mp=gpu)
   endif()
+  set(DP_HAVE_OFFLOAD ON)
 endif()
 
 
