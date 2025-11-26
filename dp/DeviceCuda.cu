@@ -52,8 +52,6 @@ namespace dp {
     void *ptr = 0;
     CUBQL_CUDA_CALL(Malloc(&ptr,numBytes));
     CUBQL_CUDA_SYNC_CHECK();
-    PRINT(numBytes);
-    PING; PRINT(ptr);
     return ptr;
   }
   
@@ -69,17 +67,17 @@ namespace dp {
     CUBQL_CUDA_SYNC_CHECK();
   }
   
-  void  DeviceAbstraction::upload(void *devAddr, const void *hostAddr, size_t numBytes)
+  void  DeviceAbstraction::upload(void *devAddr,
+                                  const void *hostAddr,
+                                  size_t numBytes)
   {
-    PING;
+    if (numBytes == 0) return;
+    assert(devAddr);
+    assert(hostAddr);
+      
     CUBQL_CUDA_SYNC_CHECK();
-    PRINT(devAddr);
-    PRINT(hostAddr);
-    PRINT(numBytes);
-    PRINT((int)isDevicePointer(devAddr));
-    PRINT((int)isDevicePointer(hostAddr));
     assert(isDevicePointer(devAddr));
-    assert(!isDevicePointer(hostAddr));
+    // assert(!isDevicePointer(hostAddr));
     SetActiveGPU forDuration(gpuID);
     CUBQL_CUDA_CALL(Memcpy(devAddr,hostAddr,numBytes,cudaMemcpyDefault));
   }

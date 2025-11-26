@@ -1,37 +1,30 @@
 #pragma once
 
+#include "dp/Triangles.h"
 #include "dp/cuBQL/CuBQLBackend.h"
 #include "dp/cuBQL/AutoUploadArray.h"
 #include <cuBQL/bvh.h>
 #include <cuBQL/queries/triangleData/Triangle.h>
 
 namespace dp_cubql {
+  using dp::Context;
   struct CuBQLBackend;
 
   using TriangleDP = cuBQL::triangle_t<double>;
-  
-  /*! triangle mesh representation on the device */
-  struct HostMesh {
-    HostMesh(CuBQLBackend *be,
-             uint64_t userData,
-             const vec3d *verticesArray, int verticesCount,
-             const vec3i *indicesArray, int indicesCount);
-    //   : userData(userData),
-    //     vertices(be,verticesArray,verticesCount),
-    //     indices(be,indicesArray,indicesCount)
-    // {}
-    
-    DevMesh getDD() const;
-    // { return { vertices.elements, indices.elements, userData }; }
-    
-    AutoUploadArray<vec3d> vertices;
-    AutoUploadArray<vec3i> indices;
-    uint64_t         const userData;
+  using dp::TrianglesDP;
+
+  /*! allows for referencing a specific primitive within a specific
+      geometry within multiple geometries that a group may be built
+      over */
+  struct PrimRef {
+    int geomID;
+    int primID;
   };
   
-  struct TrianglesDPGroup : public dp::TrianglesDPGroupImpl {
-    TrianglesDPGroup(CuBQLBackend *be,
-                     dp::TrianglesDPGroup *fe);
+  
+  struct TrianglesDPGroup : public dp::TrianglesDPGroup {
+    TrianglesDPGroup(Context *context,
+                     const std::vector<dp::TrianglesDP *> &geoms);
     virtual ~TrianglesDPGroup();
     
     struct DevGroup {
@@ -43,19 +36,27 @@ namespace dp_cubql {
     };
 
     DevGroup getDevGroup() const
-    { return { bvh,meshes,primRefs }; }
-      
-    bvh_t     bvh;
-    // DevGroup *group  = nullptr;
-    DevMesh  *meshes = nullptr;
-    PrimRef  *primRefs = nullptr;
-      
-    /*! these are stored and owned on the host, and also manage their
-      vertex arrays' ownerhip; but vertex arrays themselves will be
-      device accessible */
-    std::vector<std::shared_ptr<HostMesh>> hostMeshes;
+    { return { bvh,d_devMeshes,d_primRefs }; }
+
+    // ---------------------- build interface ----------------------
+    /*! generate boxes and primrefs for one mesh within a group; all
+      data is already allocated */
+    void generateTriangleInputs(int meshID,
+                                PrimRef *primRefs,
+                                box3d *primBounds,
+                                int numTrisThisMesh,
+                                DevMesh mesh);
+    void bvh_build(bvh_t &bvh,
+                   box3d *primBounds,
+                   int    numPrims);
+    void bvh_free(bvh_t &bvh);
+
     
-    CuBQLBackend     *const be;
+    // ---------------------- internal data ----------------------
+    bvh_t     bvh = { 0,0,0,0 };
+    // DevGroup *group  = nullptr;
+    DevMesh  *d_devMeshes = nullptr;
+    PrimRef  *d_primRefs  = nullptr;
   };
 
   inline __cubql_both

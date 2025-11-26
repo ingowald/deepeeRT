@@ -4,6 +4,8 @@
 #pragma once
 
 #include "dp/common.h"
+#include "dp/DeviceArray.h"
+#include "dp/Group.h"
 
 namespace dp {
 
@@ -13,19 +15,26 @@ namespace dp {
   struct TrianglesDP {
     TrianglesDP(Context         *context,
                 uint64_t         userData,
-                const vec3d     *vertexArray,
+                const vec3d     *verticArray,
                 int              vertexCount,
                 const vec3i     *indexArray,
                 int              indexCount);
-     
+    DeviceArray<vec3d> vertices;
+    DeviceArray<vec3i> indices;
     uint64_t     const userData      = 0;
-    const vec3d *const vertexArray   = 0;
-    const vec3i *const indexArray    = 0;
-    int          const vertexCount   = 0;
-    int          const indexCount    = 0;
     Context     *const context;
   };
 
+  struct TrianglesDPGroup : public Group {
+    TrianglesDPGroup(Context *context,
+                     const std::vector<TrianglesDP *> &meshes);
+    virtual ~TrianglesDPGroup() = default;
+
+    std::vector<TrianglesDP *> meshes;
+    Context *const context;
+  };
+
+  
 } // ::dp
 
 

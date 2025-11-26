@@ -1,22 +1,19 @@
 #pragma once
 
-#include "dp/Backend.h"
-#include "dp/World.h"
+#include "dp/Instances.h"
 
 namespace dp_cubql {
 
   struct CuBQLBackend;
   
-  struct InstancesDPGroup : public dp::InstancesDPGroupImpl {
-    InstancesDPGroup(CuBQLBackend *be,
-                     dp::InstancesDPGroup *fe)
-      : InstancesDPGroupImpl(fe), be(be)
-    { assert(fe); assert(be); }
+  struct InstancesDPGroup : public dp::InstancesDPGroup {
+    InstancesDPGroup(Context *context,
+                     const std::vector<Group *> &groups,
+                     const affine3d             *d_transforms)
+      : dp::InstancesDPGroup(context,groups,d_transforms)
+    { }
     
-    void trace(Ray *rays,
-               Hit *hits,
-               int numRays) override;
-    CuBQLBackend *const be;
+    void traceRays(Ray *d_rays, Hit *d_hits, int numRays) override;
   };
 
 }

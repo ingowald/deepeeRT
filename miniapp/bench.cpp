@@ -169,7 +169,6 @@ int main(int ac, char **av)
     std::vector<cuBQL::vec3i> int_indices;
     for (auto idx : mesh->indices)
       int_indices.push_back({(int)idx.x,(int)idx.y,(int)idx.z});
-    PING;
 
     int numVertices = mesh->vertices.size();
     int numIndices = mesh->indices.size();
@@ -192,15 +191,10 @@ int main(int ac, char **av)
   std::vector<DPRRay> h_rays = loadVectorOf<DPRRay>(raysFileName);
   int numRays = h_rays.size();
 
-  PING;
-  
   DPRRay *d_rays = (DPRRay*)device->malloc(numRays*sizeof(DPRRay));
-  
   device->upload(d_rays,h_rays.data(),numRays*sizeof(DPRRay));
-  PING;
   DPRHit *d_hits = (DPRHit*)device->malloc(numRays*sizeof(DPRHit));
   device->syncCheck();
-  PING;
 
   double targetNumSeconds = 1.f;
   double t0 = getCurrentTime();

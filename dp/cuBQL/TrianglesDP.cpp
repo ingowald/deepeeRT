@@ -2,116 +2,64 @@
 #include "dp/cuBQL/CuBQLBackend.h"
 
 namespace dp_cubql {
-  HostMesh::HostMesh(CuBQLBackend *be,
-                     uint64_t userData,
-                     const vec3d *verticesArray, int verticesCount,
-                     const vec3i *indicesArray, int indicesCount)
-    : userData(userData),
-      vertices(be,verticesArray,verticesCount),
-      indices(be,indicesArray,indicesCount)
-  {
-    PING;
-  }
-    
-  DevMesh HostMesh::getDD() const
-  { return { vertices.elements, indices.elements, userData }; }
+
+  DevMesh getDD(dp::TrianglesDP *mesh) 
+  { return { mesh->vertices.data(), mesh->indices.data(), mesh->userData }; }
   
-  TrianglesDPGroup::TrianglesDPGroup(CuBQLBackend *be,
-                                     dp::TrianglesDPGroup *fe)
-    : TrianglesDPGroupImpl(fe), be(be)
+  TrianglesDPGroup::TrianglesDPGroup(Context *context,
+                                     const std::vector<dp::TrianglesDP *> &meshes)
+    : dp::TrianglesDPGroup(context,meshes)
   {
-    PING;
-    // SetActiveGPU forDuration(be->gpuID);
-      
+    auto device = context->device;
+    
     int numTrisTotal = 0;
     std::vector<DevMesh> devMeshes;
-    for (auto geom : fe->geoms) {
-      numTrisTotal += geom->indexCount;
-      // this will automatically upload the vertex arrays if so required:
-      PING;
-      PRINT(geom->vertexArray);
-      PRINT(geom->indexArray);
-      auto hm = std::make_shared<HostMesh>
-        (be,
-         geom->userData,
-         geom->vertexArray,geom->vertexCount,
-         geom->indexArray,geom->indexCount);
-      PING;
-      hostMeshes.push_back(hm);
-      devMeshes.push_back(hm->getDD());
+    for (auto mesh : meshes) {
+      numTrisTotal += mesh->indices.size();
+      devMeshes.push_back(getDD(mesh));
     }
-    PING;
-    PRINT(numTrisTotal);
 
-    PRINT(devMeshes.size());
-    // cudaMalloc((void **)&meshes,devMeshes.size()*sizeof(DevMesh));
-    meshes = (DevMesh *)be->dev_malloc(devMeshes.size()*sizeof(DevMesh));
-    // cudaMemcpy((void*)meshes,devMeshes.data(),
-    //            devMeshes.size()*sizeof(DevMesh),cudaMemcpyDefault);
-    PING;
-    be->upload(meshes,devMeshes.data(),devMeshes.size()*sizeof(DevMesh));
+    d_devMeshes = (DevMesh *)device->malloc(devMeshes.size()*sizeof(DevMesh));
+    device->upload(d_devMeshes,devMeshes.data(),devMeshes.size()*sizeof(DevMesh));
       
-    // cudaMalloc((void **)&primRefs,numTrisTotal*sizeof(*primRefs));
-    primRefs = (PrimRef *)be->dev_malloc(numTrisTotal*sizeof(*primRefs));
-    PRINT(primRefs);
+    d_primRefs = (PrimRef *)device->malloc(numTrisTotal*sizeof(*d_primRefs));
     
     box3d   *primBounds = nullptr;
-    // cudaMalloc((void **)&primBounds,numTrisTotal*sizeof(*primBounds));
-    primBounds = (box3d *)be->dev_malloc(numTrisTotal*sizeof(*primBounds));
-    PRINT(primBounds);
+    primBounds = (box3d *)device->malloc(numTrisTotal*sizeof(*primBounds));
 
     int offset = 0;
-    for (int meshID=0;meshID<(int)hostMeshes.size();meshID++) {
-      auto &hm = hostMeshes[meshID];
-      int count = hm->indices.count;
+    for (int meshID=0;meshID<(int)meshes.size();meshID++) {
+      auto mesh = meshes[meshID];
+      int count = mesh->indices.count;
       int bs = 128;
       int nb = divRoundUp(count,bs);
-      // generateTriangleInputs<<<nb,bs>>>(meshID,
-      //                                   primRefs+offset,
-      //                                   primBounds+offset,
-      //                                   count,
-      //                                   hm->getDD());
-      be->generateTriangleInputs(meshID,
-                                 primRefs+offset,
-                                 primBounds+offset,
-                                 count,
-                                 hm->getDD());
+      generateTriangleInputs(meshID,
+                             d_primRefs+offset,
+                             primBounds+offset,
+                             count,
+                             getDD(mesh));
       
       offset += count;
     }
-    // cudaStreamSynchronize(0);
-
+    
     std::cout << "#dpr: building BVH over " << prettyNumber(numTrisTotal)
               << " triangles" << std::endl;
-    // DeviceMemoryResource memResource;
-    // ::cuBQL::cuda::sahBuilder(bvh,
-    //                           primBounds,
-    //                           numTrisTotal,
-    //                           ::cuBQL::BuildConfig(),
-    //                           0,
-    //                           memResource);
-    be->bvh_build(bvh,
-                  primBounds,
-                  numTrisTotal
-                  // ,
-                  // ::cuBQL::BuildConfig(),
-                  // 0// ,
-                  // memResource
-                  );
+    bvh_build(bvh,
+              primBounds,
+              numTrisTotal);
     std::cout << "#dpr: ... bvh built." << std::endl;
       
-    // cudaFree(primBounds);
-    be->dev_free(primBounds);
+    device->free(primBounds);
   }
   
   TrianglesDPGroup::~TrianglesDPGroup()
   {
-    // cudaFree(meshes);
-    // cudaFree(primRefs); 
-    be->dev_free(meshes); 
-    be->dev_free(primRefs); 
+    auto device = context->device;
+    
+    device->free(d_devMeshes); 
+    device->free(d_primRefs); 
     // ::cuBQL::cuda::free(bvh);
-    be->bvh_free(bvh);
+    bvh_free(bvh);
   }
 
 }

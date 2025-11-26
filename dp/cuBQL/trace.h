@@ -42,7 +42,7 @@ namespace dp_cubql {
       cuBQL::dout << "bvh.nodes " << (int*)group.bvh.nodes << "\n";
       cuBQL::dout << "bvh.primIDs " << (int*)group.bvh.primIDs << "\n";
       cuBQL::dout << "group.meshes " << (int*)group.meshes << "\n";
-      cuBQL::dout << "group.mesh0 " << group.meshes[0].userData << "\n";
+      cuBQL::dout << "group.mesh0user " << group.meshes[0].userData << "\n";
       cuBQL::dout << "group.primRefs " << (int*)group.primRefs << "\n";
     }
     auto intersectPrim = [&ray,&hit,group,instID,dbg](uint32_t primID) -> double {

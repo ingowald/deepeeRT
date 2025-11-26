@@ -5,17 +5,19 @@
 
 #include "dp/Context.h"
 #include "dp/Triangles.h"
-#include "dp/Group.h"
-#include "dp/World.h"
+#include "dp/Instances.h"
 
 namespace dp {
+  extern dp::Context *createContext(int gpuID);
 } // ::dp
+
 
 DPR_API
 DPRContext dprContextCreate(DPRContextType contextType,
                             int gpuToUse)
 {
-  return (DPRContext)new dp::Context(gpuToUse);
+  return (DPRContext)dp::createContext(gpuToUse);
+  // return (DPRContext)new dp::Context(gpuToUse);
 }
 
 DPR_API
@@ -57,7 +59,7 @@ DPRGroup dprCreateTrianglesGroup(DPRContext   _context,
     assert(geom->context == context);
     geoms.push_back(geom);
   }
-  return (DPRGroup)new dp::TrianglesDPGroup(context,geoms);
+  return (DPRGroup)context->createTrianglesDPGroup(geoms);
 }
 
 
@@ -79,7 +81,8 @@ DPRWorld dprCreateWorldDP(DPRContext _context,
     assert(group);
     groups.push_back(group);
   }
-  return (DPRWorld)new dp::InstancesDPGroup(context,groups,d_instanceTransforms);
+  return (DPRWorld)context->createInstancesDPGroup
+    (groups,(const dp::affine3d*)d_instanceTransforms);
 }
 
 DPR_API
@@ -98,8 +101,7 @@ void dprTrace(/*! the world we want the rays to be traced against */
   assert(d_hits);
   assert(d_rays);
   assert(numRays > 0);
-  PING;
-  world->traceRays(d_rays,d_hits,numRays);
+  world->traceRays((dp::Ray *)d_rays,(dp::Hit *)d_hits,numRays);
 }
 
 

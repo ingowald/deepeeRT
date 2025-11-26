@@ -9,7 +9,7 @@ namespace dp {
   Context::Context(int gpuID)
     : gpuID(gpuID)
   {
-    backend = std::make_shared<dp_cubql::CuBQLBackend>(this);
+    device = new DeviceAbstraction(gpuID);
   }
   
 } // ::dp

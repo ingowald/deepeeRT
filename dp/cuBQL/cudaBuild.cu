@@ -3,8 +3,8 @@
 
 #include "dp/cuBQL/CuBQLBackend.h"
 #include "dp/Context.h"
-#include "dp/Group.h"
-#include "dp/World.h"
+#include "dp/Instances.h"
+#include "dp/cuBQL/TrianglesDP.h"
 
 namespace dp_cubql {
   __global__
@@ -30,29 +30,17 @@ namespace dp_cubql {
     primBounds[tid] = bb;
   }
 
-  void CuBQLBackend::generateTriangleInputs(int meshID,
-                                            PrimRef *primRefs,
-                                            box3d *primBounds,
-                                            int numTrisThisMesh,
-                                            DevMesh mesh)
+  void TrianglesDPGroup::generateTriangleInputs(int meshID,
+                                                PrimRef *primRefs,
+                                                box3d *primBounds,
+                                                int numTrisThisMesh,
+                                                DevMesh mesh)
   {
-    PING;
-    CUBQL_CUDA_SYNC_CHECK();
-    PRINT(primRefs);
-    PRINT(primBounds);
-    PRINT((int)isDevicePointer(primRefs));
-    PRINT((int)isDevicePointer(primBounds));
+    auto device = context->device;
     int bs = 128;
     int nb = divRoundUp(numTrisThisMesh,bs);
     CUBQL_CUDA_SYNC_CHECK();
     CUBQL_CUDA_SYNC_CHECK_STREAM(0);
-    PRINT(primRefs);
-    PRINT(primBounds);
-    PRINT(numTrisThisMesh);
-    PRINT(bs);
-    PRINT(nb);
-    PRINT(mesh.vertices);
-    PRINT(mesh.indices);
     g_generateTriangleInputs<<<nb,bs>>>(meshID,
                                         primRefs,
                                         primBounds,
@@ -62,15 +50,14 @@ namespace dp_cubql {
     CUBQL_CUDA_SYNC_CHECK_STREAM(0);
   }
   
-  void CuBQLBackend::bvh_build(bvh_t &bvh,
-                               box3d *primBounds,
-                               int    numPrims)
+  void TrianglesDPGroup::bvh_build(bvh_t &bvh,
+                                   box3d *primBounds,
+                                   int    numPrims)
   {
     CUBQL_CUDA_SYNC_CHECK();
     CUBQL_CUDA_SYNC_CHECK_STREAM(0);
     
     DeviceMemoryResource memResource;
-    PRINT(numPrims);
 #if 0
     cuBQL::cuda::radixBuilder(bvh,primBounds,numPrims,
                               BuildConfig(),
@@ -89,7 +76,7 @@ namespace dp_cubql {
 #endif
   }
   
-  void CuBQLBackend::bvh_free(bvh_t &bvh)
+  void TrianglesDPGroup::bvh_free(bvh_t &bvh)
   {
     DeviceMemoryResource memResource;
     cuBQL::cuda::free(bvh,0,memResource);

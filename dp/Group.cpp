@@ -6,18 +6,5 @@
 
 namespace dp {
 
-  TrianglesDPGroup::TrianglesDPGroup(Context *context,
-                                     const std::vector<TrianglesDP *> &geoms)
-    : context(context),
-      geoms(geoms)
-  {
-    assert(this);
-    assert(context);
-    assert(context->backend);
-    PING;
-    impl = context->backend->createTrianglesDPGroupImpl(this);
-    assert(impl);
-  }
-
 } // ::dp
 

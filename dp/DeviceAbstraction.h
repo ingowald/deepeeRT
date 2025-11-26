@@ -15,7 +15,7 @@ namespace dp {
     void  upload(void *devAddr, const void *hostAddr, size_t numBytes);
     void  download(void *hostAddr, const void *devAddr, size_t numBytes);
     static int getDeviceCount();
-    
+
     int const gpuID;
   };
   

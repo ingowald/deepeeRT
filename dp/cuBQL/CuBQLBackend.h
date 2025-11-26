@@ -3,19 +3,19 @@
 
 #pragma once
 
-#include "dp/Backend.h"
-#include "dp/Group.h"
+#include "dp/Context.h"
 #include "dp/DeviceAbstraction.h"
+#include "dp/Group.h"
 #include <cuBQL/bvh.h>
 
 namespace dp_cubql {
-  using namespace ::dp;
   using namespace ::cuBQL;
 
   using dp::Ray;
+  using dp::Hit;
+  using dp::Group;
     
   using bvh_t = cuBQL::bvh_t<double,3>;
-  // using bvh3d = bvh_t<double,3>;
 
   struct DevMesh {
     const vec3d   *vertices;
@@ -25,54 +25,31 @@ namespace dp_cubql {
 
   // struct TrianglesDPGroup;
   
-  struct CuBQLBackend : public dp::Backend
+  struct CuBQLBackend : public dp::Context
   {
-    CuBQLBackend(Context *const context);
+    CuBQLBackend(int gpuID);
     virtual ~CuBQLBackend() = default;
     
-    virtual std::shared_ptr<InstancesDPGroupImpl>
-    createInstancesDPGroupImpl(dp::InstancesDPGroup *fe) override;
+    dp::TrianglesDP *
+    createTrianglesDP(/*! a 64-bit user-provided data that
+                        gets attached to this mesh; this is
+                        what gets reported in
+                        Hit::geomUserData if this mesh
+                        yielded the intersection.  */
+                      uint64_t userData,
+                      /*! device array of vertices */
+                      vec3d   *vertexArray,
+                      size_t   vertexCount,
+                      /*! device array of int3 vertex indices */
+                      vec3i   *indexArray,
+                      size_t   indexCount) override;
     
-    virtual std::shared_ptr<TrianglesDPGroupImpl>
-    createTrianglesDPGroupImpl(dp::TrianglesDPGroup *fe) override;
+    dp::TrianglesDPGroup *
+    createTrianglesDPGroup(const std::vector<dp::TrianglesDP *> &geoms) override;
     
-    // ---------------------- build interface ----------------------
-    /*! generate boxes and primrefs for one mesh within a group; all
-        data is already allocated */
-    void generateTriangleInputs(int meshID,
-                                PrimRef *primRefs,
-                                box3d *primBounds,
-                                int numTrisThisMesh,
-                                DevMesh mesh);
-    void bvh_build(bvh_t &bvh,
-                   box3d *primBounds,
-                   int    numPrims);
-    void bvh_free(bvh_t &bvh);
-
-    // ---------------------- trace abstraction ----------------------
-    void trace(TrianglesDPGroup *dp,
-               Ray *rays,
-               Hit *hits,
-               int numRays);
-    
-    // ---------------------- device abstraction ----------------------
-    DeviceAbstraction *device = 0;
-    /*! device abstraction ... */
-    void  dev_init();
-    bool  isDevicePointer(const void *ptr)
-    { return DeviceAbstraction::isDevicePointer(ptr); }
-    void *dev_malloc(size_t numBytes)
-    { assert(device); return device->malloc(numBytes); }
-    void  dev_free(void *ptr)
-    { assert(device); device->free(ptr); }
-    void  dev_sync_check()
-    { assert(device); device->syncCheck(); }
-    void  upload(void *devAddr, const void *hostAddr, size_t numBytes)
-    { assert(device); device->upload(devAddr,hostAddr,numBytes); }
-    void  download(void *hostAddr, const void *devAddr, size_t numBytes)
-    { assert(device); device->download(hostAddr,devAddr,numBytes); }
-    int   dev_deviceCount()
-    { return DeviceAbstraction::getDeviceCount(); }
+    dp::InstancesDPGroup *
+    createInstancesDPGroup(const std::vector<Group *> &instanceGroups,
+                           const affine3d *instanceTransforms) override;
   };
 
 }

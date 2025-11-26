@@ -96,8 +96,8 @@ struct DPRAffine {
   
 struct DPRRay {
   DPRvec3 origin;
-  DPRvec3 direction;
   double  tMin;
+  DPRvec3 direction;
   double  tMax;
 };
 

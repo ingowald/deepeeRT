@@ -18,30 +18,23 @@ namespace dp_cubql {
       trace(tid,group,rays,hits,numRays,dbg);
   }
   
-  void InstancesDPGroup::trace(Ray *rays,
-                               Hit *hits,
-                               int numRays)
+  void InstancesDPGroup::traceRays(Ray *rays,
+                                   Hit *hits,
+                                   int numRays)
   {
-    PING;
-    PRINT(numRays);
+    auto device = context->device;
+    assert(device->isDevicePointer(rays));
+    assert(device->isDevicePointer(hits));
 
-    dp::Group *fe_group = this->fe->groups[0];
-    assert(fe_group);
-    
     // we know right now all groups are triangle groups
-    dp::TrianglesDPGroup *fe_trianglesGroup
-      = (dp::TrianglesDPGroup*)fe_group;
+    TrianglesDPGroup *gg0
+      = (TrianglesDPGroup*)groups[0];
+    assert(gg0);
     
-    TrianglesDPGroup *my_trianglesGroup
-      = (TrianglesDPGroup *)fe_trianglesGroup->impl.get();
-    
-    // TrianglesDPGroup *triangles,
-    //                            Ray *rays,
-    //                            Hit *hits,
-    //                            int numRays
     int bs = 128;
     int nb = divRoundUp(numRays,bs);
-    g_trace<<<nb,bs>>>(my_trianglesGroup->getDevGroup(),
+    auto devGroup = gg0->getDevGroup();
+    g_trace<<<nb,bs>>>(devGroup,
                        rays,hits,
                        numRays);
     CUBQL_CUDA_SYNC_CHECK();

@@ -31,14 +31,12 @@ target_link_libraries(dp_config INTERFACE
 )
 
 set(DEEPEE_SOURCES
-  Backend.h
-  Backend.cpp
   ../include/deepee/deepee.h
   common.h
   Triangles.h
   Triangles.cpp
-  World.h
-  World.cu
+  Instances.h
+  Instances.cpp
   Context.h
   Context.cpp
   Group.h

@@ -11,16 +11,17 @@ namespace dp {
                            int              vertexCount,
                            const vec3i     *_indexArray,
                            int              indexCount)
-    : userData(userData),
-      vertexArray(_vertexArray),
-      indexArray(_indexArray),
-      vertexCount(vertexCount),
-      indexCount(indexCount),
-      context(context)
-  {
-    assert(vertexArray);
-    assert(indexArray);
-  }
+    : context(context),
+      userData(userData),
+      vertices(context->device,_vertexArray,vertexCount),
+      indices(context->device,_indexArray,indexCount)
+  {}
   
+  TrianglesDPGroup::TrianglesDPGroup(Context *context,
+                                     const std::vector<TrianglesDP *> &meshes)
+    : context(context),
+      meshes(meshes)
+  {}
+
 } // ::dp
 

@@ -4,25 +4,23 @@
 #pragma once
 
 #include "dp/Triangles.h"
+#include "dp/Ray.h"
 
 namespace dp {
 
   struct Context;
   struct Group;
 
-  struct InstancesDPGroupImpl;
-  
   struct InstancesDPGroup {
     InstancesDPGroup(Context *context,
                      const std::vector<Group *> &groups,
-                     const DPRAffine            *d_transforms);
+                     const affine3d             *d_transforms);
     
-    void traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays);
+    virtual void traceRays(Ray *d_rays, Hit *d_hits, int numRays) = 0;
     
     std::vector<Group *> const groups;
-    const DPRAffine     *const d_transforms;
+    DeviceArray<affine3d>      transforms;
     Context             *const context;
-    std::shared_ptr<InstancesDPGroupImpl> impl;
   };
     
 } // ::dp

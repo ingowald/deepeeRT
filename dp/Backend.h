@@ -4,57 +4,13 @@
 #pragma once
 
 #include "dp/common.h"
+#include "dp/Triangles.h"
+#include "dp/Instances.h"
 
 namespace dp {
-  struct Context;
-  struct TrianglesDPGroup;
-  struct InstancesDPGroup;
   
-  /*! CAREFUL: this HAS to match the data layout of DPRRay in deepee.h !*/
-  struct Ray {
-    vec3d origin;
-    vec3d direction;
-    double  tMin;
-    double  tMax;
-  };
-
-  /*! CAREFUL: this HAS to match the data layout of DPRHit in deepee.h !*/
-  struct Hit {
-    /*! index of prim within the geometry it was created in. A value of
-      '-1' means 'no hit' */
-    int     primID;
-    /* index of the instance that contained the hit point. Undefined if
-       on hit occurred */
-    int     instID;
-    /*! user-supplied geom ID (the one specified during geometry create
-      call) for the geometry that contained the hit. Unlike primID and
-      instID this is *not* a linear ID, but whatever int64 value the
-      user specified there. */
-    uint64_t geomUserData;
-    double  t;
-    double  u, v;
-  };
-
-  /*! implements a group of double-precision triangles */
-  struct TrianglesDPGroupImpl {
-    TrianglesDPGroupImpl(TrianglesDPGroup *const _fe) : fe(_fe) { assert(fe); }
-    virtual ~TrianglesDPGroupImpl() = default;
-    TrianglesDPGroup *const fe;
-  };
-    
-  /*! implements a group of double-precision instances, including the
-    actual trace() method */
-  struct InstancesDPGroupImpl {
-    InstancesDPGroupImpl(InstancesDPGroup *const fe) : fe(fe) {}
-    virtual ~InstancesDPGroupImpl() = default;
-
-    virtual void trace(Ray *rays,
-                       Hit *hits,
-                       int numRays) = 0;
-    
-    InstancesDPGroup *const fe;
-  };
-
+  struct Context;
+  
   /*! implements an actual backend for a double-precision ray tracing
       context. primarily acts as 'factory' for instance and geometry
       groups that then do the actual work */
@@ -63,7 +19,7 @@ namespace dp {
     virtual ~Backend() = default;
     
     virtual std::shared_ptr<InstancesDPGroupImpl>
-    createInstancesDPGroupImpl(dp::InstancesDPGroup *fe) = 0;
+    createInstancesDPGroupImpl() = 0;
     
     virtual std::shared_ptr<TrianglesDPGroupImpl>
     createTrianglesDPGroupImpl(dp::TrianglesDPGroup *fe) = 0;
