@@ -31,6 +31,7 @@ namespace miniapp {
   private:
     void load_binmesh(const std::string &fileName);
     void load_obj(const std::string &fileName);
+    void load_dgef(const std::string &fileName);
   };
   
   /*! helper function that creates a mesh with a terrain-like shape,
