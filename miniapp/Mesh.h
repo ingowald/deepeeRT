@@ -6,13 +6,15 @@
 #include "deepee/deepee.h"
 #include "cuBQL/math/box.h"
 #include "cuBQL/math/linear.h"
-#include <cuda_runtime.h>
+// #include <cuda_runtime.h>
 
 #include <vector>
 #include <map>
 #include <memory>
 #include <string>
 #include <iostream>
+
+#include "dpc/dpc.h"
 
 namespace miniapp {
   using namespace cuBQL;

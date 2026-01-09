@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-find_package(CUDAToolkit REQUIRED)
 
+add_subdirectory(dpc)
+
+find_package(CUDAToolkit REQUIRED)
 add_library(deepeeRT_common STATIC
   Backend.h
   Backend.cpp
@@ -13,6 +15,7 @@ target_include_directories(deepeeRT_common PUBLIC
 )
 target_link_libraries(deepeeRT_common PUBLIC
   cuBQL
+  deepeeRT_dpc
   CUDA::cuda_driver
   CUDA::cudart_static
 )

@@ -82,14 +82,17 @@ namespace miniapp {
   }
 
 
-  __global__
-  void g_shadeRays(vec4f *d_pixels,
-                   DPRRay *d_rays,
-                   DPRHit *d_hits,
-                   vec2i fbSize)
+  // __global__
+  DPC_KERNEL(g_shadeRays)(dpc::Kernel2D dpk,
+                                 vec4f *d_pixels,
+                                 DPRRay *d_rays,
+                                 DPRHit *d_hits,
+                                 vec2i fbSize)
   {
-    int ix = threadIdx.x+blockIdx.x*blockDim.x;
-    int iy = threadIdx.y+blockIdx.y*blockDim.y;
+    // int ix = rtc.threadIdx().x+rtc.blockIdx().x*rtc.blockDim().x;
+    // int iy = rtc.threadIdx().y+rtc.blockIdx().y*rtc.blockDim().y;
+    int ix = dpk.workIdx().x;
+    int iy = dpk.workIdx().y;
     
     if (ix >= fbSize.x) return;
     if (iy >= fbSize.y) return;
@@ -102,15 +105,18 @@ namespace miniapp {
     d_pixels[tid] = pixel;
   }
   
-  __global__
-  void g_generateRays(DPRRay *d_rays,
-                      vec2i fbSize,
-                      const Camera camera)
+  // __global__
+  DPC_KERNEL(g_generateRays)(dpc::Kernel2D dpk,
+                             DPRRay *d_rays,
+                             vec2i fbSize,
+                             const Camera camera)
   {
     static_assert(sizeof(DPRRay) == sizeof(Ray));
     
-    int ix = threadIdx.x+blockIdx.x*blockDim.x;
-    int iy = threadIdx.y+blockIdx.y*blockDim.y;
+    int ix = dpk.workIdx().x;
+    int iy = dpk.workIdx().y;
+    // int ix = threadIdx.x+blockIdx.x*blockDim.x;
+    // int iy = threadIdx.y+blockIdx.y*blockDim.y;
     
     if (ix >= fbSize.x) return;
     if (iy >= fbSize.y) return;
@@ -152,6 +158,9 @@ namespace miniapp {
     if (inFileName.empty())
       throw std::runtime_error("no input file name specified");
 
+    int gpuID = 0;
+    dpc::Device *dpc = new dpc::Device(gpuID);
+
     Mesh object;
     object.load(inFileName);
     scale = scale * length(object.bounds().size());
@@ -179,26 +188,41 @@ namespace miniapp {
     std::cout << "#dpm: creating world" << std::endl;
     DPRWorld world = createWorld(dpr,{&object,&terrain});
 
-    CUBQL_CUDA_SYNC_CHECK();
+    dpc->syncCheck();
     DPRRay *d_rays = 0;
-    cudaMalloc((void **)&d_rays,fbSize.x*fbSize.y*sizeof(DPRRay));
-    CUBQL_CUDA_SYNC_CHECK();
-    g_generateRays<<<nb,bs>>>(d_rays,fbSize,camera);
-    CUBQL_CUDA_SYNC_CHECK();
+    // cudaMalloc((void **)&d_rays,fbSize.x*fbSize.y*sizeof(DPRRay));
+    dpc->malloc((void **)&d_rays,fbSize.x*fbSize.y*sizeof(DPRRay));
+    dpc->syncCheck();
+    // g_generateRays<<<nb,bs>>>(d_rays,fbSize,camera);
+    DPC_KERNEL2D_CALL(dpc,g_generateRays,
+                    // dims
+                    nb,bs,
+                    // args
+                    d_rays,fbSize,camera);
+    dpc->syncCheck();
       
     DPRHit *d_hits = 0;
-    cudaMalloc((void **)&d_hits,fbSize.x*fbSize.y*sizeof(DPRHit));
+    dpc->malloc((void **)&d_hits,fbSize.x*fbSize.y*sizeof(DPRHit));
+    // cudaMalloc((void **)&d_hits,fbSize.x*fbSize.y*sizeof(DPRHit));
 
-    CUBQL_CUDA_SYNC_CHECK();
+    dpc->syncCheck();
     std::cout << "#dpm: calling trace" << std::endl;
     dprTrace(world,d_rays,d_hits,fbSize.x*fbSize.y);
 
     std::cout << "#dpm: shading rays" << std::endl;
-    vec4f *m_pixels = 0;
-    cudaMallocManaged((void **)&m_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
-    g_shadeRays<<<nb,bs>>>(m_pixels,d_rays,d_hits,fbSize);
-    cudaStreamSynchronize(0);
-
+    // vec4f *m_pixels = 0;
+    // cudaMallocManaged((void **)&m_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
+    vec4f *h_pixels = 0;
+    vec4f *d_pixels = 0;
+    dpc->malloc((void **)&d_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
+    h_pixels = (vec4f *)malloc(fbSize.x*fbSize.y*sizeof(vec4f));
+    // g_shadeRays<<<nb,bs>>>(m_pixels,d_rays,d_hits,fbSize);
+    DPC_KERNEL2D_CALL(dpc,g_shadeRays,nb,bs,
+                      // args
+                      d_pixels,d_rays,d_hits,fbSize);
+    // cudaStreamSynchronize(0);
+    dpc->syncCheck();
+    dpc->download(h_pixels,d_pixels,fbSize.x*fbSize.y*sizeof(DPRHit));
 
     std::cout << "#dpm: writing test image to " << outFileName << std::endl;
     std::ofstream out(outFileName.c_str());
@@ -210,7 +234,7 @@ namespace miniapp {
     out << fbSize.x << " " << fbSize.y << " 255" << std::endl;
     for (int iy=0;iy<fbSize.y;iy++) {
       for (int ix=0;ix<fbSize.x;ix++) {
-        vec4f pixel = m_pixels[ix+(fbSize.y-1-iy)*fbSize.x];
+        vec4f pixel = h_pixels[ix+(fbSize.y-1-iy)*fbSize.x];
         auto write = [&](float f) {
           f = f*256.f;
           f = std::min(f,255.f);
