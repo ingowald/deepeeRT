@@ -103,16 +103,27 @@ namespace miniapp {
     vec4f pixel = {color.x,color.y,color.z,1.f};
     int tid = ix+iy*fbSize.x;
     d_pixels[tid] = pixel;
+    if (tid == 0) printf("color %f %f %f\n",
+                         color.x,color.y,color.z);
   }
+
   
-  // __global__
-  DPC_KERNEL(g_generateRays)(dpc::Kernel2D dpk,
+#pragma omp declare target
+  inline void g_generateRays(int i,//dpc::Kernel2D dpk,
                              DPRRay *d_rays,
                              vec2i fbSize,
                              const Camera camera)
+  // DPC_KERNEL(g_generateRays)(dpc::Kernel2D dpk,
+  //                            DPRRay *d_rays,
+  //                            vec2i fbSize,
+  //                            const Camera camera)
   {
-    static_assert(sizeof(DPRRay) == sizeof(Ray));
-    
+// #pragma omp target is_device_ptr(d_rays)
+    // static_assert(sizeof(DPRRay) == sizeof(Ray));
+
+    while(1) ;
+
+#if 0
     int ix = dpk.workIdx().x;
     int iy = dpk.workIdx().y;
     // int ix = threadIdx.x+blockIdx.x*blockDim.x;
@@ -124,12 +135,26 @@ namespace miniapp {
     double u = ix+.5;
     double v = iy+.5;
 
+    while(1) ;
+    d_rays->origin.x = 0;
+    return;
     vec2d pixel = {u,v};
     Ray ray = camera.generateRay(pixel,false);
 
     int rayID = ix+iy*fbSize.x;
     ((Ray *)d_rays)[rayID] = ray;
+
+    if (rayID == 123) printf("bla %f %f %f : %f %f %f\n",
+                             ray.origin.x,
+                             ray.origin.y,
+                             ray.origin.z,
+                             ray.direction.x,
+                             ray.direction.y,
+                             ray.direction.z
+                             );
+#endif
   }
+#pragma omp end declare target
   
   void main(int ac, char **av)
   {
@@ -188,17 +213,30 @@ namespace miniapp {
     std::cout << "#dpm: creating world" << std::endl;
     DPRWorld world = createWorld(dpr,{&object,&terrain});
 
-    dpc->syncCheck();
+    dpc->syncCheck(); 
     DPRRay *d_rays = 0;
     // cudaMalloc((void **)&d_rays,fbSize.x*fbSize.y*sizeof(DPRRay));
     dpc->malloc((void **)&d_rays,fbSize.x*fbSize.y*sizeof(DPRRay));
     dpc->syncCheck();
     // g_generateRays<<<nb,bs>>>(d_rays,fbSize,camera);
-    DPC_KERNEL2D_CALL(dpc,g_generateRays,
+#if DPC_OMP
+    PING;
+    size_t numTotal = (nb.x*(size_t)bs.x*nb.y*(size_t)nb.y);        
+#pragma omp target parallel 
+    for (int i=0;i<numTotal;i++)                                   
+      g_generateRays(// dpc::Kernel2D(bs.x,bs.y,bs.x,bs.y,i),
+                     i,
+                     d_rays,fbSize,camera
+                     );
+    PING;
+#else
+    DPC_KERNEL2D_CALL(dpc,
+                      g_generateRays,
                     // dims
                     nb,bs,
                     // args
                     d_rays,fbSize,camera);
+#endif
     dpc->syncCheck();
       
     DPRHit *d_hits = 0;
@@ -217,12 +255,13 @@ namespace miniapp {
     dpc->malloc((void **)&d_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
     h_pixels = (vec4f *)malloc(fbSize.x*fbSize.y*sizeof(vec4f));
     // g_shadeRays<<<nb,bs>>>(m_pixels,d_rays,d_hits,fbSize);
-    DPC_KERNEL2D_CALL(dpc,g_shadeRays,nb,bs,
+    DPC_KERNEL2D_CALL(dpc,
+                      g_shadeRays,nb,bs,
                       // args
                       d_pixels,d_rays,d_hits,fbSize);
     // cudaStreamSynchronize(0);
     dpc->syncCheck();
-    dpc->download(h_pixels,d_pixels,fbSize.x*fbSize.y*sizeof(DPRHit));
+    dpc->download(h_pixels,d_pixels,fbSize.x*fbSize.y*sizeof(vec4f));
 
     std::cout << "#dpm: writing test image to " << outFileName << std::endl;
     std::ofstream out(outFileName.c_str());

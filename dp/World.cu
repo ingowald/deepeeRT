@@ -23,6 +23,7 @@ namespace dp {
     if (!isDevicePointer(d_rays) ||
         !isDevicePointer(d_hits))
       throw std::runtime_error("the rays[] and hits[] arrays passed to dpTrace (currently?) have to point to device memory.");
+
     impl->trace((Ray*)d_rays,
                 (Hit*)d_hits,
                 numRays);

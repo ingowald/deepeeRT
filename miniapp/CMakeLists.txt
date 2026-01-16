@@ -5,7 +5,7 @@ set(DPC_SOURCE_FILES
 )
 
 dpc_configure_source(Camera.cu)
-dpc_configure_source(miniapp.cu)
+dpc_configure_source(miniapp.cpp)
 
 add_executable(dpMiniApp
   Mesh.h
@@ -13,7 +13,9 @@ add_executable(dpMiniApp
   import_OBJ.cpp
   Camera.h
   Camera.cu
-  miniapp.cu
+  miniapp.cpp
 )
+dpc_configure_target(dpMiniApp)
+
 target_link_libraries(dpMiniApp PUBLIC deepeeRT deepeeRT_dpc)
 

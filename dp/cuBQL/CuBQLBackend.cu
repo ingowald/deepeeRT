@@ -174,7 +174,7 @@ namespace dp {
                 << " triangles" << std::endl;
       CUBQL_CUDA_SYNC_CHECK();
       DeviceMemoryResource memResource;
-#if 0
+#if 1
       ::cuBQL::gpuBuilder(bvh,
                                 primBounds,
                                 numTrisTotal,
@@ -208,12 +208,15 @@ namespace dp {
                             int numRays)
     {
       int tid = threadIdx.x+blockIdx.x*blockDim.x;
+      if (tid == 0)
+        printf("g_trace(%i)\n",numRays);
+      
       if (tid >= numRays) return;
 
 #ifdef NDEBUG
       const bool dbg = false;
 #else
-      bool dbg = (tid == -1);
+      bool dbg = (tid == 0);
 #endif
 
       
