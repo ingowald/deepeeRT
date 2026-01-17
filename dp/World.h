@@ -3,26 +3,27 @@
 
 #pragma once
 
-#include "dp/Triangles.h"
+#include "dp/Group.h"
 
 namespace dp {
 
   struct Context;
   struct Group;
 
-  struct InstancesDPImpl;
-  
-  struct InstancesDPGroup {
-    InstancesDPGroup(Context *context,
-                     const std::vector<Group *> &groups,
-                     const DPRAffine            *d_transforms);
+  /*! a group of double precision instances; each instance is defined
+      by a affine transforms and TrianglesDPGroup that it refers to */
+  struct InstanceGroup : public Group {
+    InstanceGroup(Context *context,
+                  const std::vector<Group *> &groups,
+                  const DPRAffine            *transforms)
+      : Group(context)
+    {}
     
-    void traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays);
-    
-    std::vector<Group *> const groups;
-    const DPRAffine     *const d_transforms;
-    Context             *const context;
-    std::shared_ptr<InstancesDPImpl> impl;
+    virtual void traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays) = 0;
+
+    /* iw - note this base class will NOT store any pointers to host
+       data, it's the job of the derived class(es) to sture data as,
+       if, and where required*/
   };
     
 } // ::dp

@@ -6,9 +6,9 @@
 
 namespace dp {
 
-  Backend::Backend(Context *const context)
-    : context(context),
-      gpuID(context->gpuID)
-  {}
+  // Backend::Backend(Context *const context)
+  //   : context(context),
+  //     gpuID(context->gpuID)
+  // {}
 
 } // ::dp

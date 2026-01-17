@@ -5,29 +5,22 @@
 #include "dp/Context.h"
 
 namespace dp {
-  TrianglesDP::TrianglesDP(Context         *context,
+  TriangleMesh::TriangleMesh(Context         *context,
                            uint64_t         userData,
                            const vec3d     *_vertexArray,
                            int              vertexCount,
                            const vec3i     *_indexArray,
                            int              indexCount)
     : userData(userData),
-      vertexCount(vertexCount),
-      indexCount(indexCount),
       context(context)
   {
-    cudaMalloc((void**)&vertexArray,vertexCount*sizeof(vec3d));
-    cudaMemcpy((void*)vertexArray,_vertexArray,
-               vertexCount*sizeof(vec3d),cudaMemcpyDefault);
-    cudaMalloc((void**)&indexArray,indexCount*sizeof(vec3i));
-    cudaMemcpy((void*)indexArray,_indexArray,
-               indexCount*sizeof(vec3i),cudaMemcpyDefault);
+    /* iw - note this class will NOT store any pointers to host data,
+       it's the job of the derived class(es) to sture data as, if, and
+       where required*/
   }
 
-  TrianglesDP::~TrianglesDP()
+  TriangleMesh::~TriangleMesh()
   {
-    cudaFree((void*)indexArray);
-    cudaFree((void*)vertexArray);
   }
   
 } // ::dp

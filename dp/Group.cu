@@ -5,14 +5,8 @@
 #include "dp/Context.h"
 
 namespace dp {
-
-  TrianglesDPGroup::TrianglesDPGroup(Context *context,
-                                     const std::vector<TrianglesDP *> &geoms)
-    : context(context),
-      geoms(geoms)
-  {
-    impl = context->backend->createTrianglesDPImpl(this);
-  }
-
+  
+  /* nothing - all abstract classes in header */
+  
 } // ::dp
 

@@ -8,9 +8,12 @@ namespace dp {
   
   Context::Context(int gpuID)
     : gpuID(gpuID)
+  {}
+
+  Context *Context::create(int gpuID)
   {
-    backend = std::make_shared<CuBQLCUDABackend>(this);
-  }
+    return new cubql_cuda::CuBQLCUDABackend(gpuID);
+  };
   
 } // ::dp
 

@@ -15,7 +15,7 @@ DPR_API
 DPRContext dprContextCreate(DPRContextType contextType,
                             int gpuToUse)
 {
-  return (DPRContext)new dp::Context(gpuToUse);
+  return (DPRContext)dp::Context::create(gpuToUse);
 }
 
 DPR_API
@@ -27,20 +27,20 @@ DPRTriangles dprCreateTrianglesDP(DPRContext _context,
                                     yielded the intersection.  */
                                   uint64_t userData,
                                   /*! device array of vertices */
-                                  DPRvec3 *d_vertexArray,
+                                  DPRvec3 *vertexArray,
                                   size_t   vertexCount,
                                   /*! device array of int3 vertex indices */
-                                  DPRint3 *d_indexArray,
+                                  DPRint3 *indexArray,
                                   size_t   indexCount)
 {
   dp::Context *context = (dp::Context *)_context;
   assert(context);
-  return (DPRTriangles)new dp::TrianglesDP(context,
-                                           userData,
-                                           (const dp::vec3d*)d_vertexArray,
-                                           vertexCount,
-                                           (const dp::vec3i*)d_indexArray,
-                                           indexCount);
+  return (DPRTriangles)context->
+    createTriangleMesh(userData,
+                       (const dp::vec3d*)vertexArray,
+                       vertexCount,
+                       (const dp::vec3i*)indexArray,
+                       indexCount);
 }
 
 DPR_API
@@ -50,36 +50,33 @@ DPRGroup dprCreateTrianglesGroup(DPRContext   _context,
 {
   dp::Context *context = (dp::Context *)_context;
   assert(context);
-  std::vector<dp::TrianglesDP*> geoms;
+  std::vector<dp::TriangleMesh*> geoms;
   for (int i=0;i<(int)triangleGeomsCount;i++) {
-    dp::TrianglesDP *geom = (dp::TrianglesDP *)triangleGeomsArray[i];
+    dp::TriangleMesh *geom = (dp::TriangleMesh *)triangleGeomsArray[i];
     assert(geom);
     assert(geom->context == context);
     geoms.push_back(geom);
   }
-  return (DPRGroup)new dp::TrianglesDPGroup(context,geoms);
+  return (DPRGroup)context->createTrianglesGroup(geoms);
 }
-
 
 DPR_API
 DPRWorld dprCreateWorldDP(DPRContext _context,
                           DPRGroup   *instanceGroups,
-                          DPRAffine  *d_instanceTransforms,
+                          DPRAffine  *instanceTransforms,
                           size_t      instanceCount)
 {
   dp::Context *context = (dp::Context *)_context;
   assert(context);
   
-  assert(instanceCount == 1 && "instancing not yet implemented");
-  assert(d_instanceTransforms == nullptr && "instancing not yet implemented");
-  
-  std::vector<dp::Group *> groups;
+  std::vector<dp::TrianglesGroup *> groups;
   for (int i=0;i<(int)instanceCount;i++) {
-    dp::Group *group = (dp::Group *)instanceGroups[i];
+    dp::TrianglesGroup *group = (dp::TrianglesGroup *)instanceGroups[i];
     assert(group);
     groups.push_back(group);
   }
-  return (DPRWorld)new dp::InstancesDPGroup(context,groups,d_instanceTransforms);
+  return (DPRWorld)context->
+    createInstanceGroup(groups,instanceTransforms);
 }
 
 DPR_API
@@ -93,7 +90,7 @@ void dprTrace(/*! the world we want the rays to be traced against */
                 d_hits *must* have (at least) that many entires */
               int numRays)
 {
-  dp::InstancesDPGroup *world = (dp::InstancesDPGroup *)_world;
+  dp::InstanceGroup *world = (dp::InstanceGroup *)_world;
   assert(world);
   assert(d_hits);
   assert(d_rays);
