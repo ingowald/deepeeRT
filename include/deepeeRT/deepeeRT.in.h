@@ -44,6 +44,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#define DEEPEERT_VERSION_MAJOR @DEEPEERT_VERSION_MAJOR@
+#define DEEPEERT_VERSION_MINOR @DEEPEERT_VERSION_MINOR@
+#define DEEPEERT_VERSION_PATCH @DEEPEERT_VERSION_PATCH@
+
+
 #ifdef _WIN32
 // for now, we only support a static build for this library
 # if 1 || defined(deepeeRT_STATIC)

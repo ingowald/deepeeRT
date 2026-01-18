@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA
+// CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
-#include "deepee/deepee.h"
+#include "deepeeRT/deepeeRT.h"
 #include "cuBQL/math/box.h"
 #include "cuBQL/math/linear.h"
 #include <cuda_runtime.h>
