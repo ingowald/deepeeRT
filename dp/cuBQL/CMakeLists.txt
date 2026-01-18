@@ -3,7 +3,11 @@
 
 add_library(deepeeRT_cuBQL STATIC
   CuBQLBackend.h
-  CuBQLBackend.cu
+  CuBQLBackend.cu 
+  Triangles.h
+  Triangles.cu
+  InstanceGroup.h
+  InstanceGroup.cu
 )
 target_link_libraries(deepeeRT_cuBQL PUBLIC
   deepeeRT_common

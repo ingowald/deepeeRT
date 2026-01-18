@@ -35,41 +35,42 @@ namespace dp {
     double  u, v;
   };
 
-  /*! implements a group of double-precision triangles */
-  struct TrianglesDPImpl {
-    TrianglesDPImpl(TrianglesDPGroup *const fe) : fe(fe) {}
-    virtual ~TrianglesDPImpl() = default;
-    TrianglesDPGroup *const fe;
-  };
+  // /*! implements a group of double-precision triangles */
+  // struct TrianglesDPImpl {
+  //   TrianglesDPImpl(TrianglesDPGroup *const fe) : fe(fe) {}
+  //   virtual ~TrianglesDPImpl() = default;
+  //   TrianglesDPGroup *const fe;
+  // };
     
-  /*! implements a group of double-precision instances, including the
-    actual trace() method */
-  struct InstancesDPImpl {
-    InstancesDPImpl(InstancesDPGroup *const fe) : fe(fe) {}
-    virtual ~InstancesDPImpl() = default;
+  // /*! implements a group of double-precision instances, including the
+  //   actual trace() method */
+  // struct InstancesDPImpl {
+  //   InstancesDPImpl(InstancesDPGroup *const fe) : fe(fe) {}
+  //   virtual ~InstancesDPImpl() = default;
 
-    virtual void trace(Ray *rays,
-                       Hit *hits,
-                       int numRays) = 0;
+  //   virtual void trace(Ray *rays,
+  //                      Hit *hits,
+  //                      int numRays) = 0;
     
-    InstancesDPGroup *const fe;
-  };
+  //   InstancesDPGroup *const fe;
+  // };
 
-  /*! implements an actual backend for a double-precision ray tracing
-      context. primarily acts as 'factory' for instance and geometry
-      groups that then do the actual work */
-  struct Backend {
-    Backend(Context *const context);
-    virtual ~Backend() = default;
+  // /*! implements an actual backend for a double-precision ray tracing
+  //     context. primarily acts as 'factory' for instance and geometry
+  //     groups that then do the actual work */
+  // struct Backend {
+  //   Backend(Context *const context);
+  //   virtual ~Backend() = default;
     
-    virtual std::shared_ptr<InstancesDPImpl>
-    createInstancesDPImpl(dp::InstancesDPGroup *fe) = 0;
+  //   virtual std::shared_ptr<InstancesDPImpl>
+  //   createInstancesDPImpl(dp::InstancesDPGroup *fe) = 0;
     
-    virtual std::shared_ptr<TrianglesDPImpl>
-    createTrianglesDPImpl(dp::TrianglesDPGroup *fe) = 0;
+  //   virtual std::shared_ptr<TrianglesDPImpl>
+  //   createTrianglesDPImpl(dp::TrianglesDPGroup *fe) = 0;
     
-    Context *const context;
-    int const gpuID;
-  };
-  
+  //   Context *const context;
+  //   int const gpuID;
+  // };
+
+  static Context *createBackend(int gpuID);
 } // ::dp
