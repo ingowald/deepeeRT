@@ -19,9 +19,6 @@ namespace dp {
        where required*/
   }
   
-  TriangleMesh::~TriangleMesh()
-  {}
-
   TrianglesGroup::TrianglesGroup(Context *context,
                                  const std::vector<TriangleMesh *> &geoms)
     : Group(context)

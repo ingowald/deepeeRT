@@ -6,7 +6,9 @@
 
 namespace dp {
   
-  /* nothing - all abstract classes in header */
+  Group::Group(Context *const context)
+    : context(context)
+  {}
   
 } // ::dp
 

@@ -20,7 +20,7 @@ namespace dp {
                  int              vertexCount,
                  const vec3i     *indexArray,
                  int              indexCount);
-    virtual ~TriangleMesh();
+    virtual ~TriangleMesh() = default;
 
     /* iw - note this base class will NOT store any pointers to host
        data, it's the job of the derived class(es) to sture data as,

@@ -14,7 +14,7 @@ namespace dp {
       into InstancesGroup and TrianglesGroup, and then implemented in
       each backend based on how this backend works */
   struct Group {
-    Group(Context *const context) : context(context) {}
+    Group(Context *const context);
     virtual ~Group() = default;
     
     /*! context that this group was created in */

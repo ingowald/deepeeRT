@@ -19,7 +19,8 @@ namespace dp {
                   const DPRAffine            *transforms)
       : Group(context)
     {}
-    
+
+    /*! implements dprTrace() */
     virtual void traceRays(DPRRay *d_rays,
                            DPRHit *d_hits,
                            int numRays,
