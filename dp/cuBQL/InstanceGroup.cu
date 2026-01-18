@@ -90,10 +90,12 @@ namespace dp {
       CUBQL_CUDA_SYNC_CHECK();
 
       DeviceMemoryResource memResource;
+      ::cuBQL::BuildConfig buildConfig;
+      buildConfig.maxAllowedLeafSize = 1;
       ::cuBQL::cuda::sahBuilder(bvh,
                                 d_instBounds,
                                 numInstances,
-                                ::cuBQL::BuildConfig(),
+                                buildConfig,
                                 0,
                                 memResource);
       

@@ -17,7 +17,8 @@ namespace miniapp {
       
       size_t header;
       in.read((char*)&header,sizeof(header));
-
+      
+      bool isProperDGEF = (header == 0xdefdefdefULL);
       size_t numMeshes;
       in.read((char*)&numMeshes,sizeof(numMeshes));
       for (int meshID=0;meshID<numMeshes;meshID++) {
@@ -28,7 +29,6 @@ namespace miniapp {
         size_t count;
         in.read((char*)&count,sizeof(count));
         mesh.vertices.resize(count);
-
         in.read((char*)mesh.vertices.data(),
                 count*sizeof(vec3d));
       
@@ -73,6 +73,7 @@ namespace miniapp {
         for (auto m : inst->object->meshes)
           for (auto v : m->vertices)
             bounds.extend(xfmPoint(inst->xfm,v));
+      PRINT(bounds);
       return bounds;
     }
 

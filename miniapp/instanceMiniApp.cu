@@ -56,12 +56,14 @@ namespace miniapp {
 
     for (auto inst : scene->instances)
       objects[inst->object] = 0;
+    PRINT(objects.size());
 
     std::cout << "#dpm: creating objects" << std::endl;
     int meshID = 0;
     for (auto &pairs : objects) {
       auto obj = pairs.first;
       std::vector<DPRTriangles> geoms;
+      PRINT((dgef::Object*)obj);
       for (auto pm : obj->meshes) {
         std::cout << "#dpm: creating dpr triangle mesh w/ "
                   << prettyNumber(pm->indices.size()) << " triangles"
@@ -178,7 +180,7 @@ namespace miniapp {
                                    /* bounds to focus on */
                                    bounds,
                                    /* point we're looking from*/
-                                   vec3d(-3,-1,-2),
+                                   length(bounds.size())*vec3d(-3,1,-2),
                                    /* up for orientation */
                                    vec3d(0,1,0));
 
