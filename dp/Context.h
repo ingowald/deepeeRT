@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "deepee/deepee.h"
 #include "dp/common.h"
 #include "dp/Backend.h"
 #include <memory>

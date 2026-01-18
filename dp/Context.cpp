@@ -10,10 +10,5 @@ namespace dp {
     : gpuID(gpuID)
   {}
 
-  Context *Context::create(int gpuID)
-  {
-    return new cubql_cuda::CuBQLCUDABackend(gpuID);
-  };
-  
 } // ::dp
 

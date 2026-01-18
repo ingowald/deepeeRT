@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "dp/cuBQL/CuBQLBackend.h"
+#include "dp/cuBQL/Triangles.h"
+#include "dp/cuBQL/InstanceGroup.h"
 
 namespace dp {
   namespace cubql_cuda {
@@ -201,9 +203,9 @@ namespace dp {
     dp::InstanceGroup *
     CuBQLCUDABackend::
     createInstanceGroup(const std::vector<dp::TrianglesGroup *> &groups,
-                        const DPRAffine *transforms) ;
+                        const DPRAffine *transforms)
     {
-      return new InstanceGroup(groups,(const affine3d*)transforms);
+      return new InstanceGroup(this, groups,(const affine3d*)transforms);
     }
     
     dp::TriangleMesh *
@@ -214,7 +216,8 @@ namespace dp {
                        const vec3i     *indexArray,
                        int              indexCount) 
     {
-      return new TriangleMesh(userData,
+      return new TriangleMesh(this,
+                              userData,
                               vertexArray,
                               vertexCount,
                               indexArray,
@@ -225,9 +228,14 @@ namespace dp {
     CuBQLCUDABackend::
     createTrianglesGroup(const std::vector<dp::TriangleMesh *> &geoms)
     {
-      return new TrianglesGroup(geoms);
+      return new TrianglesGroup(this,geoms);
     }
   } // :: cubql_cuda
+  
+  Context *Context::create(int gpuID)
+  {
+    return new cubql_cuda::CuBQLCUDABackend(gpuID);
+  };
   
 }
 

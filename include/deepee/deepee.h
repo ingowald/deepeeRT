@@ -113,7 +113,10 @@ struct DPRHit {
     instID this is *not* a linear ID, but whatever int64 value the
     user specified there. */
   uint64_t geomUserData;
-  double  tHit;
+  union {
+    double  tHit; // << old (pre v0.2) spelling
+    double t;
+  };
   double  u, v;
 };
 

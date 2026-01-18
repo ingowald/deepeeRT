@@ -44,6 +44,7 @@ namespace dp {
                                    const std::vector<dp::TriangleMesh *> &meshes)
       : dp::TrianglesGroup(context,meshes)
     {
+      CUBQL_CUDA_SYNC_CHECK();
       SetActiveGPU forDuration(context->gpuID);
       
       int numTrisTotal = 0;
@@ -78,8 +79,8 @@ namespace dp {
       }
       cudaStreamSynchronize(0);
       
-      std::cout << "#dpr: building BVH over " << prettyNumber(numTrisTotal)
-                << " triangles" << std::endl;
+      // std::cout << "#dpr: building BVH over " << prettyNumber(numTrisTotal)
+      //           << " triangles" << std::endl;
       CUBQL_CUDA_SYNC_CHECK();
       DeviceMemoryResource memResource;
 #if 0
@@ -97,7 +98,7 @@ namespace dp {
                                 0,
                                 memResource);
 #endif
-      std::cout << "#dpr: ... bvh built." << std::endl;
+      // std::cout << "#dpr: ... bvh built." << std::endl;
       
       cudaFree(d_primBounds);
       CUBQL_CUDA_SYNC_CHECK();
@@ -105,9 +106,11 @@ namespace dp {
   
     TrianglesGroup::~TrianglesGroup()
     {
+      CUBQL_CUDA_SYNC_CHECK();
       cudaFree(d_meshDDs);
       cudaFree(d_primRefs);
       ::cuBQL::cuda::free(bvh);
+      CUBQL_CUDA_SYNC_CHECK();
     }
 
   }

@@ -42,8 +42,10 @@ namespace dp {
   struct TrianglesGroup : public Group {
     TrianglesGroup(Context *context,
                    const std::vector<TriangleMesh *> &geoms);
-
-    std::vector<TriangleMesh *> geoms;
+    
+    /* iw - note this base class will NOT store any pointers to host
+       data, it's the job of the derived class(es) to sture data as,
+       if, and where required*/
   };
 
 } // ::dp

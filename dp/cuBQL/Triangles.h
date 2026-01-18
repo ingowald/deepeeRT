@@ -35,43 +35,54 @@ namespace dp {
     
     /*! a group/acceleration structure over one or more triangle meshes */
     struct TrianglesGroup : public dp::TrianglesGroup {
-      TrianglesGroup(Context *context,
-                     const std::vector<dp::TriangleMesh *> &geoms);
-      ~TrianglesGroup() override;
-
       /*! device data for a cubql group over one or more triangle
           meshes */
       struct DD {
         /*! return the triangle specified by the given primref */
+        inline __cubql_both DD() = default;
         inline __cubql_both TriangleDP getTriangle(PrimRef prim) const;
         
-        bvh3d             bvh;
         TriangleMesh::DD *meshes;
         PrimRef          *primRefs;
+        bvh3d             bvh;
       };
+      
+      TrianglesGroup(Context *context,
+                     const std::vector<dp::TriangleMesh *> &geoms);
+      ~TrianglesGroup() override;
+
 
       DD getDD() const
-      { return { bvh,d_meshDDs,d_primRefs }; }
+      {
+        DD dd;
+        dd.meshes = d_meshDDs;
+        dd.primRefs = d_primRefs;
+        dd.bvh = bvh;
+        return dd;
+      }
       
       bvh3d             bvh;
-      TriangleMesh::DD *d_meshDDs  = nullptr;
-      PrimRef          *d_primRefs = nullptr;
+      TriangleMesh::DD *d_meshDDs;
+      PrimRef          *d_primRefs;
     };
 
-
-    
     inline __cubql_both
     TriangleDP TriangleMesh::DD::getTriangle(uint32_t primID) const
     {
       vec3i idx = indices[primID];
-      return { vertices[idx.x],vertices[idx.y],vertices[idx.z] };
+      TriangleDP tri;
+      tri.a = vertices[idx.x];
+      tri.b = vertices[idx.y];
+      tri.c = vertices[idx.z];
+      return tri;
     }
 
     inline __cubql_both
     TriangleDP TrianglesGroup::DD::getTriangle(PrimRef prim) const
     {
-      TriangleMesh::DD mesh = meshes[prim.geomID];
-      return mesh.getTriangle(prim.primID);
+      const TriangleMesh::DD &mesh = meshes[prim.geomID];
+      TriangleDP tri = mesh.getTriangle(prim.primID);
+      return tri;
     }
     
   }

@@ -51,6 +51,7 @@ namespace miniapp {
   DPRWorld createWorld(DPRContext context,
                        const std::vector<Mesh *> &meshes)
   {
+      CUBQL_CUDA_SYNC_CHECK();
     std::vector<DPRTriangles> geoms;
     int meshID = 0;
     for (auto pm : meshes) {
@@ -66,18 +67,23 @@ namespace miniapp {
                                                pm->vertices.size(),
                                                (DPRint3*)d_indices,
                                                pm->indices.size());
+      CUBQL_CUDA_SYNC_CHECK();
       geoms.push_back(geom);
     }
+    CUBQL_CUDA_SYNC_CHECK();
     std::cout << "#dpm: creating dpr triangles group w/ "
               << geoms.size() << " meshes" << std::endl;
     DPRGroup group = dprCreateTrianglesGroup(context,
                                              geoms.data(),
                                              geoms.size());
+    CUBQL_CUDA_SYNC_CHECK();
+    
     std::cout << "#dpm: creating dpr world" << std::endl;
     DPRWorld world = dprCreateWorldDP(context,
                                       &group,
                                       nullptr,
                                       1);
+      CUBQL_CUDA_SYNC_CHECK();
     return world;
   }
 
@@ -118,16 +124,25 @@ namespace miniapp {
     double u = ix+.5;
     double v = iy+.5;
 
+    bool dbg = false;//ix == 512 && iy == 512;
     vec2d pixel = {u,v};
-    Ray ray = camera.generateRay(pixel,false);
+    Ray ray = camera.generateRay(pixel,dbg);
 
     int rayID = ix+iy*fbSize.x;
+    if (dbg)
+      printf("ray %f %f %f : %f %f %f\n",
+             (float)ray.origin.x,
+             (float)ray.origin.y,
+             (float)ray.origin.z,
+             (float)ray.direction.x,
+             (float)ray.direction.y,
+             (float)ray.direction.z);
     ((Ray *)d_rays)[rayID] = ray;
   }
   
   void main(int ac, char **av)
   {
-    double scale = 1;
+    double scale = 3;
     std::string up = "y";
     std::string inFileName;
     std::string outFileName = "deepeeTest.ppm";
@@ -167,7 +182,7 @@ namespace miniapp {
                                    /* bounds to focus on */
                                    object.bounds(),
                                    /* point we're looking from*/
-                                   -1.*scale*(dx+dy)+.5*scale*dz,
+                                   -2.*scale*(dx+dy)+scale*dz,
                                    /* up for orientation */
                                    dz);
 

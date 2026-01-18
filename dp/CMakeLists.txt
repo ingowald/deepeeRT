@@ -6,6 +6,15 @@ find_package(CUDAToolkit REQUIRED)
 add_library(deepeeRT_common STATIC
   Backend.h
   Backend.cpp
+  common.h
+  Triangles.h
+  Triangles.cpp
+  World.h
+  World.cpp
+  Group.h
+  Group.cpp
+  Context.h
+  Context.cpp
 )
 target_include_directories(deepeeRT_common PUBLIC
   ${PROJECT_SOURCE_DIR}
@@ -19,20 +28,11 @@ target_link_libraries(deepeeRT_common PUBLIC
 
 add_library(deepeeRT STATIC
   ../include/deepee/deepee.h
-  common.h
-  Triangles.h
-  Triangles.cu
-  World.h
-  World.cu
-  Context.h
-  Context.cpp
-  Group.h
-  Group.cu
   deepeeRT.cpp
 )
 
 add_subdirectory(cuBQL)
 target_link_libraries(deepeeRT PUBLIC
-  deepeeRT_common
   deepeeRT_cuBQL
+  deepeeRT_common
 )

@@ -62,7 +62,7 @@ namespace dp {
 
     __global__
     void g_traceWorld(/*! the device data for the instancegroup itself */
-                      InstanceGroup::DeviceRecord model,
+                      InstanceGroup::DD model,
                       /*! the list of instance transforms */
                       const DPRAffine     *const d_transforms,
                       /*! the list of instantiated groups */
