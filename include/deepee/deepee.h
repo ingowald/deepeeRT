@@ -77,6 +77,14 @@ typedef struct _DPRContext       *DPRContext;
 
 typedef enum { DPR_CONTEXT_GPU } DPRContextType;
 
+#define DPR_FLAGS_NONE (uint64_t(0))
+/*! if enabled, we will skip all intersections with triangles whose
+    normal faces TOWARDS the origin (ie, cull iff dot(ray.dir,N)<0) */
+#define DPR_CULL_FRONT (uint64_t(1ull<<0))
+/*! if enabled, we will skip all intersections with triangles whose
+    normal faces AWAY the origin (ie, cull iff dot(ray.dir,N)>0) */
+#define DPR_CULL_BACK  (uint64_t(1ull<<1))
+
 struct DPRint3 { int32_t x,y,z; };
 struct DPRvec3 { double  x,y,z; };
 struct DPRvec4 { double  x,y,z,w; };
@@ -165,7 +173,8 @@ void dprTrace(/*! the world we want the rays to be traced against */
               DPRHit *d_hits,
               /*! number of rays that need tracing. d_rays and
                 d_hits *must* have (at least) that many entires */
-              int numRays);
+              int numRays,
+              uint64_t flags = 0ull);
 
 DPR_API void dprFreeWorld(DPRWorld world);
 DPR_API void dprFreeTriangles(DPRTriangles triangles);

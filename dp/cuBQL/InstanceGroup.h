@@ -32,7 +32,10 @@ namespace dp {
       
       DD getDD() const;
 
-      void traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays) override;
+      void traceRays(DPRRay *d_rays,
+                     DPRHit *d_hits,
+                     int numRays,
+                     uint64_t flags) override;
 
       int                numInstances = 0;
       InstancedObjectDD *d_instanceDDs = 0;

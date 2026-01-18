@@ -20,7 +20,10 @@ namespace dp {
       : Group(context)
     {}
     
-    virtual void traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays) = 0;
+    virtual void traceRays(DPRRay *d_rays,
+                           DPRHit *d_hits,
+                           int numRays,
+                           uint64_t flags) = 0;
 
     /* iw - note this base class will NOT store any pointers to host
        data, it's the job of the derived class(es) to store data as,

@@ -88,14 +88,15 @@ void dprTrace(/*! the world we want the rays to be traced against */
               DPRHit *d_hits,
               /*! number of rays that need tracing. d_rays and
                 d_hits *must* have (at least) that many entires */
-              int numRays)
+              int numRays,
+              uint64_t flags)
 {
   dp::InstanceGroup *world = (dp::InstanceGroup *)_world;
   assert(world);
   assert(d_hits);
   assert(d_rays);
   assert(numRays > 0);
-  world->traceRays(d_rays,d_hits,numRays);
+  world->traceRays(d_rays,d_hits,numRays,flags);
 }
 
 

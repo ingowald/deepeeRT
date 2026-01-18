@@ -158,10 +158,15 @@ namespace miniapp {
     std::string inFileName;
     std::string outFileName = "deepeeTest.ppm";
     vec2i fbSize = { 1024,1024 };
+    uint64_t flags = 0;
     for (int i=1;i<ac;i++) {
       std::string arg = av[i];
       if (arg[0] != '-') {
         inFileName = arg;
+      } else if (arg == "-bc" || arg == "--backface-culling") {
+        flags |= DPR_CULL_BACK;
+      } else if (arg == "-fc" || arg == "--frontface-culling") {
+        flags |= DPR_CULL_FRONT;
       } else if (arg == "-or" || arg == "--output-res") {
         fbSize.x = std::stoi(av[++i]);
         fbSize.y = std::stoi(av[++i]);
@@ -178,7 +183,7 @@ namespace miniapp {
                                    /* bounds to focus on */
                                    bounds,
                                    /* point we're looking from*/
-                                   length(bounds.size())*vec3d(-3,1,-2),
+                                   length(bounds.size())*vec3d(2,1,4),
                                    /* up for orientation */
                                    vec3d(0,1,0));
 
@@ -202,7 +207,7 @@ namespace miniapp {
 
     CUBQL_CUDA_SYNC_CHECK();
     std::cout << "#dpm: calling trace" << std::endl;
-    dprTrace(world,d_rays,d_hits,fbSize.x*fbSize.y);
+    dprTrace(world,d_rays,d_hits,fbSize.x*fbSize.y,flags);
 
     std::cout << "#dpm: shading rays" << std::endl;
     vec4f *m_pixels = 0;

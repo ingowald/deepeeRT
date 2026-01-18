@@ -124,7 +124,8 @@ namespace dp {
                      InstanceGroup::DD world,
                      DPRRay *rays,
                      DPRHit *hits,
-                     int numRays)
+                     int numRays,
+                     uint64_t flags)
     {
       int tid = threadIdx.x+blockIdx.x*blockDim.x;
       if (tid >= numRays) return;
@@ -149,7 +150,8 @@ namespace dp {
                               rays[tid].tMin,
                               rays[tid].tMax);
       
-      auto intersectPrim = [&hit,&worldRay,&objectSpace,dbg](uint32_t primID)
+      auto intersectPrim
+        = [&hit,&worldRay,&objectSpace,flags,dbg](uint32_t primID)
         -> double
       {
         RayTriangleIntersection isec;
@@ -157,11 +159,13 @@ namespace dp {
         PrimRef prim = group.primRefs[primID];
         const TriangleDP tri = group.getTriangle(prim);
 
-        double dt0,dt1;
-        box3d dbb = tri.bounds();
-        rayBoxTest(dt0,dt1,objectSpace.ray,dbb);
-        
-        if (isec.compute(objectSpace.ray,tri)) {
+        auto getNormal = [tri]() { return cross(tri.b-tri.a,tri.c-tri.a); };
+        bool culled = false;
+        if (flags & DPR_CULL_FRONT)
+          culled |= (dot(getNormal(),objectSpace.ray.direction) <= 0.);
+        if (flags & DPR_CULL_BACK)
+          culled |= (dot(getNormal(),objectSpace.ray.direction) >= 0.);
+        if (!culled && isec.compute(objectSpace.ray,tri)) {
           hit.primID = prim.primID;
           hit.instID = objectSpace.instID;
           hit.geomUserData = group.meshes[prim.geomID].userData;
@@ -201,13 +205,16 @@ namespace dp {
     }
 
     
-    void InstanceGroup::traceRays(DPRRay *d_rays, DPRHit *d_hits, int numRays)
+    void InstanceGroup::traceRays(DPRRay *d_rays,
+                                  DPRHit *d_hits,
+                                  int numRays,
+                                  uint64_t flags)
     {
       int bs = 128;
       int nb = divRoundUp(numRays,bs);
       g_traceRays<<<nb,bs>>>(getDD(),
-                             d_rays,d_hits,
-                             numRays);
+                             d_rays,d_hits,numRays,
+                             flags);
       cudaDeviceSynchronize();
     }
       
