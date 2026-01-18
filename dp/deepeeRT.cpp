@@ -99,5 +99,30 @@ void dprTrace(/*! the world we want the rays to be traced against */
   world->traceRays(d_rays,d_hits,numRays,flags);
 }
 
+DPR_API void dprFreeWorld(DPRWorld world)
+{
+  assert(world);
+  delete (dp::InstanceGroup *)world;
+}
+    
+DPR_API void dprFreeTriangles(DPRTriangles triangles)
+{
+  assert(triangles);
+  delete (dp::TriangleMesh *)triangles;
+}
+    
+DPR_API void dprFreeGroup(DPRGroup group)
+{
+  assert(group);
+  delete (dp::TrianglesGroup *)group;
+}
+    
+DPR_API void dprFreeContext(DPRContext context)
+{
+  assert(context);
+  delete (dp::Context *)context;
+}
+    
+
 
 

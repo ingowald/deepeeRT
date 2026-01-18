@@ -17,7 +17,7 @@ add_library(deepeeRT_common STATIC
   Context.cpp
 )
 target_include_directories(deepeeRT_common PUBLIC
-  ${PROJECT_SOURCE_DIR}
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 target_link_libraries(deepeeRT_common PUBLIC
