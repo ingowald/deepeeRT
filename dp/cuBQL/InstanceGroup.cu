@@ -92,6 +92,9 @@ namespace dp {
       DeviceMemoryResource memResource;
       ::cuBQL::BuildConfig buildConfig;
       buildConfig.maxAllowedLeafSize = 1;
+      std::cout << "==================================================================" << std::endl;
+      PING;
+      std::cout << "TOP" << std::endl;
       ::cuBQL::cuda::sahBuilder(bvh,
                                 d_instBounds,
                                 numInstances,
@@ -100,6 +103,7 @@ namespace dp {
                                 memResource);
       
       CUBQL_CUDA_SYNC_CHECK();
+      PING;
       cudaFree(d_instBounds);
     }
 

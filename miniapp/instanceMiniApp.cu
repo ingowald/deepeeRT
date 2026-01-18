@@ -56,14 +56,12 @@ namespace miniapp {
 
     for (auto inst : scene->instances)
       objects[inst->object] = 0;
-    PRINT(objects.size());
 
-    std::cout << "#dpm: creating objects" << std::endl;
+    std::cout << "#dpm: creating " << objects.size() << " objects" << std::endl;
     int meshID = 0;
     for (auto &pairs : objects) {
       auto obj = pairs.first;
       std::vector<DPRTriangles> geoms;
-      PRINT((dgef::Object*)obj);
       for (auto pm : obj->meshes) {
         std::cout << "#dpm: creating dpr triangle mesh w/ "
                   << prettyNumber(pm->indices.size()) << " triangles"

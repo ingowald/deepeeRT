@@ -40,6 +40,16 @@ namespace miniapp {
         }
       }
 
+      if (!isProperDGEF) {
+        Object *object = new Object;
+        object->meshes = meshes;
+        Instance *inst = new Instance;
+        inst->xfm = affine3d();
+        inst->object = object;
+        scene->instances.push_back(inst);
+        return scene;
+      }
+      
       size_t numObjects;
       in.read((char*)&numObjects,sizeof(numObjects));
       int meshBegin = 0;
@@ -68,12 +78,13 @@ namespace miniapp {
 
     box3d Scene::bounds() const
     {
+      std::cout << "#dpm: computing scene bounds" << std::endl;
       box3d bounds;
       for (auto inst : instances)
         for (auto m : inst->object->meshes)
           for (auto v : m->vertices)
             bounds.extend(xfmPoint(inst->xfm,v));
-      PRINT(bounds);
+      std::cout << "#dpm: bounds = " << bounds << std::endl;
       return bounds;
     }
 
