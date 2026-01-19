@@ -32,6 +32,9 @@ add_library(deepeeRT STATIC
   ../include/deepeeRT/deepeeRT.h
   deepeeRT.cpp
 )
+target_include_directories(deepeeRT PUBLIC
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
 
 add_subdirectory(cuBQL)
 target_link_libraries(deepeeRT PUBLIC

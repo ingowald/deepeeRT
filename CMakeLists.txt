@@ -13,7 +13,7 @@ set(CMAKE_CUDA_ARCHITECTURES native)
 
 cmake_minimum_required(VERSION 3.16)
 cmake_policy(SET CMP0048 NEW)
-project(DeePeeRT VERSION ${DEEPEERT_VERSION} LANGUAGES C CXX CUDA)
+project(deepeeRT VERSION ${DEEPEERT_VERSION} LANGUAGES C CXX CUDA)
 
 if(NOT SET_UP_CONFIGURATIONS_DONE)
   set(SET_UP_CONFIGURATIONS_DONE 1)
@@ -119,5 +119,10 @@ install(EXPORT deepeeRT-config
 configure_file(
   ${PROJECT_SOURCE_DIR}/include/deepeeRT/deepeeRT.in.h
   include/deepeeRT/deepeeRT.h
+)
+
+install(
+  DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/deepeeRT
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}
 )
 
