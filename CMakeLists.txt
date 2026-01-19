@@ -100,8 +100,8 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/cmake
 install(
   TARGETS
   deepeeRT
-  EXPORT deepeeRT
-#  EXPORT deepeeRT-config
+#  EXPORT deepeeRT
+  EXPORT deepeeRT-config
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   NAMELINK_SKIP
   # on Windows put the dlls into bin
@@ -109,8 +109,8 @@ install(
   # ... and the import lib into the devel package
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-#install(EXPORT deepeeRT-config
-install(EXPORT deepeeRT
+install(EXPORT deepeeRT-config
+#install(EXPORT deepeeRT
   DESTINATION ${DEEPEERT_CMAKE_INSTALL_DESTINATION}
   NAMESPACE deepeeRT::
   )
