@@ -7,8 +7,15 @@
 #include "dp/Triangles.h"
 #include "dp/Group.h"
 #include "dp/World.h"
+#include "dp/cuBQL/CuBQLBackend.h"
 
 namespace dp {
+
+  Context *Context::create(int gpuID)
+  {
+    return new cubql_cuda::CuBQLCUDABackend(gpuID);
+  };
+  
 } // ::dp
 
 DPR_API

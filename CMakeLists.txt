@@ -3,7 +3,7 @@
 
 set(DEEPEERT_VERSION_MAJOR 0)
 set(DEEPEERT_VERSION_MINOR 3)
-set(DEEPEERT_VERSION_PATCH 0)
+set(DEEPEERT_VERSION_PATCH 2)
 set(DEEPEERT_VERSION ${DEEPEERT_VERSION_MAJOR}.${DEEPEERT_VERSION_MINOR}.${DEEPEERT_VERSION_PATCH})
   
 set(CMAKE_BUILD_TYPE_INIT "Release")
@@ -51,7 +51,7 @@ add_subdirectory(dp)
 if (NOT (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR}))
   # don't build miniapp if this is a subproject
 else()
-  add_subdirectory(miniapp)
+#  add_subdirectory(miniapp)
 endif()
 
 
