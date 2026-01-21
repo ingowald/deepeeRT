@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+cmake_minimum_required(VERSION 3.24)
+
 set(DEEPEERT_VERSION_MAJOR 0)
 set(DEEPEERT_VERSION_MINOR 3)
 set(DEEPEERT_VERSION_PATCH 0)
@@ -13,7 +15,7 @@ set(CMAKE_CXX_STANDARD 20)
 option(DEEPEERT_OMP "Enable experimental OpenMP build" OFF)
 mark_as_advanced(DEEPEERT_OMP)
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0048 NEW)
 if (DEEPEERT_OMP)
   project(DeePeeRT VERSION ${DEEPEERT_VERSION} LANGUAGES C CXX)
@@ -111,8 +113,7 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/cmake
 install(
   TARGETS
   deepeeRT
-#  EXPORT deepeeRT
-#  EXPORT deepeeRT-config
+  EXPORT deepeeRT-config
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   NAMELINK_SKIP
   # on Windows put the dlls into bin
@@ -120,8 +121,8 @@ install(
   # ... and the import lib into the devel package
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-#install(EXPORT deepeeRT-config
-install(EXPORT deepeeRT
+install(EXPORT deepeeRT-config
+#install(EXPORT deepeeRT
   DESTINATION ${DEEPEERT_CMAKE_INSTALL_DESTINATION}
   NAMESPACE deepeeRT::
   )

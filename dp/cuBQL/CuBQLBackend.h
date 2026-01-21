@@ -35,7 +35,8 @@ namespace dp {
 #elif defined (__CUDACC__)
 # define __dp_global __global__
     struct Kernel {
-      inline int workIdx() const { return threadIdx.x+blockIdx.x*blockDim.x; }
+      inline __device__
+      int workIdx() const { return threadIdx.x+blockIdx.x*blockDim.x; }
     };
 #endif
 

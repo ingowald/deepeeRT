@@ -8,15 +8,16 @@
 namespace dp {
   namespace cubql_cuda {
 
-    __global__
-    void g_prepareInstances(int numInstances,
+    __dp_global
+    void g_prepareInstances(Kernel kernel,
+                            int numInstances,
                             InstanceGroup::InstancedObjectDD *instances,
                             bool hasTransforms,
                             affine3d *worldToObjectXfms,
                             affine3d *objectToWorldXfms,
                             box3d *d_instBounds)
     {
-      int tid = threadIdx.x+blockIdx.x*blockDim.x;
+      int tid = kernel.workIdx();//threadIdx.x+blockIdx.x*blockDim.x;
       if (tid >= numInstances) return;
       affine3d xfm;
       if (!hasTransforms) {
@@ -50,7 +51,10 @@ namespace dp {
                           (const DPRAffine *)transforms),
         numInstances((int)groups.size())
     {
+#if DP_OMP
+#else
       CUBQL_CUDA_SYNC_CHECK();
+#endif
       assert(numInstances > 0);
       std::vector<InstancedObjectDD> instanceDDs;
       for (auto _group : groups) {
@@ -75,6 +79,29 @@ namespace dp {
         omp_target_alloc(numInstances*sizeof(affine3d),context->gpuID);
       d_objectToWorldXfms  = (affine3d*)
         omp_target_alloc(numInstances*sizeof(affine3d),context->gpuID);
+
+      if (transforms)
+        omp_target_memcpy(d_objectToWorldXfms,
+                          transforms,
+                          numInstances*sizeof(affine3d),
+                          0,0,
+                          context->gpuID,
+                          context->hostID);
+      box3d *d_instBounds = 0;
+      cudaMalloc((void**)&d_instBounds,
+                 numInstances*sizeof(box3d));
+# pragma omp target device(context->gpuID)
+# pragma omp teams distribute parallel for
+      for (int i=0;i<numInstances;i++)
+        g_prepareInstances
+        // <<<divRoundUp(numInstances,128),128>>>
+          (Kernel{i},
+           numInstances,
+         d_instanceDDs,
+         transforms != 0,
+         d_worldToObjectXfms,
+         d_objectToWorldXfms,
+         d_instBounds);
 #else
       cudaMalloc((void**)&d_instanceDDs,
                  numInstances*sizeof(*d_instanceDDs));
