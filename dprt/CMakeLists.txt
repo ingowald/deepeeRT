@@ -33,6 +33,7 @@ target_link_libraries(dprt_common INTERFACE
 target_compile_definitions(dprt_common INTERFACE
   -Ddprt_STATIC=1)
 if (DPRT_EXP_SP)
+message("running FLOAT backend")
   target_compile_definitions(dprt_common INTERFACE
     -DDPRT_EXP_SP=1)
 endif()
