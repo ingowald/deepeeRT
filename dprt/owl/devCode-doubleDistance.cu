@@ -34,7 +34,7 @@ OPTIX_ANY_HIT_PROGRAM(TriMesh)()
   vec3f f_dir = to_cubql(optixGetObjectRayDirection());
   vec3d org = vec3d(f_org);
   vec3d dir = vec3d(f_dir);
-
+  
   int primID = optixGetPrimitiveIndex();
   auto &geom = owl::getProgramData<dprt::owl::TriangleMesh::DD>();
   vec3i idx = geom.indices[primID];

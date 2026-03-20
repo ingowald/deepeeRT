@@ -60,7 +60,6 @@ namespace dprt {
 
   Context *Context::create(int gpuID)
   {
-PRINT(sizeof(impl_scalar_t));
     return new cubql_cuda::CuBQLCUDABackend(gpuID);
   };
   

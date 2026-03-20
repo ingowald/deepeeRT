@@ -55,6 +55,9 @@ namespace dprt {
 #endif
       owlGeomTypeSetClosestHit(trianglesGT,0,module,"TriMesh");
       
+#if EXP_DOUBLE_DISTANCE
+      owlGeomTypeSetAnyHit(trianglesGT,0,module,"TriMesh");
+#endif
       owlBuildPrograms(owl);
       owlBuildPipeline(owl);
     }
