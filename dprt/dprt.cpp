@@ -20,6 +20,7 @@ DPRT_API
 DPRTContext dprtContextCreate(DPRTContextType contextType,
                               int gpuToUse)
 {
+PING;
   return (DPRTContext)dprt::Context::create(gpuToUse);
 }
 
