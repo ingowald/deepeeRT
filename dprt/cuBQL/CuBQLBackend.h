@@ -9,7 +9,6 @@
 # include <omp.h>
 #endif
 #include <cuBQL/bvh.h>
-#include <cuBQL/bvh.h>
 #include <cuBQL/math/common.h>
 #include <cuBQL/math/Ray.h>
 #include <cuBQL/math/affine.h>
@@ -183,5 +182,3 @@ namespace dprt {
   }
 } // ::dprt
 
-
-  
