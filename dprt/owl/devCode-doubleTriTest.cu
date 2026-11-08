@@ -44,9 +44,19 @@ OPTIX_INTERSECT_PROGRAM(TriMesh)()
   vec3i idx = mesh.indices[primID];
 
   cuBQL::triangle_t<double> tri;
-  tri.a = vec3d(mesh.vertices[idx.x]);
-  tri.b = vec3d(mesh.vertices[idx.y]);
-  tri.c = vec3d(mesh.vertices[idx.z]);
+
+  float3 v0 = (const float3&)mesh.vertices[idx.x];
+  float3 v1 = (const float3&)mesh.vertices[idx.y];
+  float3 v2 = (const float3&)mesh.vertices[idx.z];
+  v0 = optixTransformPointFromObjectToWorldSpace(v0);
+  v1 = optixTransformPointFromObjectToWorldSpace(v1);
+  v2 = optixTransformPointFromObjectToWorldSpace(v2);
+  tri.a = vec3d((const vec3f &)v0);
+  tri.b = vec3d((const vec3f &)v1);
+  tri.c = vec3d((const vec3f &)v2);
+  // tri.a = vec3d(mesh.vertices[idx.x]);
+  // tri.b = vec3d(mesh.vertices[idx.y]);
+  // tri.c = vec3d(mesh.vertices[idx.z]);
   
   cuBQL::RayTriangleIntersection_t<double> isec;
   if (!isec.compute(prd.dpRay,tri)) return;
